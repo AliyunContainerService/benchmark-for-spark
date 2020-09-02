@@ -53,3 +53,6 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
 - [Shuffle优化](docs/performance/shuffle.md)
 - [分布式缓存优化](docs/performance/alluxio.md)
 - [调度优化](docs/performance/scheduler.md)
+
+## 鸣谢
+本项目参考了https://github.com/aws-samples/eks-spark-benchmark，感谢其优秀的工作。
