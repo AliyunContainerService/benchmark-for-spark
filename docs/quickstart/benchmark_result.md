@@ -1,8 +1,8 @@
-1. [测试环境搭建](docs/quickstart/benchmark_env.md)
-2. [测试代码开发](docs/quickstart/benchmark_code.md)
-3. [Spark on ACK测试](docs/quickstart/benchmark_steps.md)
-4. [测试结果分析](docs/quickstart/benchmark_result.md)
-5. [问题排查定位](docs/quickstart/debugging_guide.md)
+1. [测试环境搭建](benchmark_env.md)
+2. [测试代码开发](benchmark_code.md)
+3. [Spark on ACK测试](benchmark_steps.md)
+4. [测试结果分析](benchmark_result.md)
+5. [问题排查定位](debugging_guide.md)
 
 ## 压测环境 
 

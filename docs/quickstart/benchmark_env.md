@@ -1,8 +1,8 @@
-1. [测试环境搭建](docs/quickstart/benchmark_env.md)
-2. [测试代码开发](docs/quickstart/benchmark_code.md)
-3. [Spark on ACK测试](docs/quickstart/benchmark_steps.md)
-4. [测试结果分析](docs/quickstart/benchmark_result.md)
-5. [问题排查定位](docs/quickstart/debugging_guide.md)
+1. [测试环境搭建](benchmark_env.md)
+2. [测试代码开发](benchmark_code.md)
+3. [Spark on ACK测试](benchmark_steps.md)
+4. [测试结果分析](benchmark_result.md)
+5. [问题排查定位](debugging_guide.md)
 
 ## 环境准备
 
@@ -10,13 +10,13 @@
 
 创建ACK标准专有集群，其中worker节点采用大数据网络增强型的ecs.d1ne.6xlarge规格，共20个节点。
 
-![create_ack_cluster.jpeg](docs/img/create_ack_cluster.jpeg)
+![create_ack_cluster.jpeg](../img/create_ack_cluster.jpeg)
 
 
 
 其中每个ecs.d1ne.6xlarge自带12块5TB的HDD数据盘，需要对这12个数据盘进行分区格式化挂载，操作步骤请参考[分区格式linux数据盘](https://help.aliyun.com/document_detail/34377.html?spm=a2c4g.11174283.6.813.4be652feB9omRD#title-f8r-9od-yn9)。格式化并挂载完成后，执行df -h，可以看到如下的挂载情况。/mnt目录下的12个文件路径会在Alluxio中用到。
 
-![mount_disk.jpeg](docs/img/mount_disk.jpeg)
+![mount_disk.jpeg](../img/mount_disk.jpeg)
 
 
 
@@ -30,7 +30,7 @@
 
 在ack管控台，**市场**-**应用目录**中找到ack-spark-operator，点击右侧“**创建**”按钮，安装spark operator。
 
-![install_spark_operator.jpeg](docs/img/install_spark_operator.jpeg)
+![install_spark_operator.jpeg](../img/install_spark_operator.jpeg)
 
 安装完成后，执行命令查看是否成功
 
@@ -42,7 +42,7 @@ kubectl get deployment ack-spark-operator -n spark-operator
 
 ### 4）安装ack-spark-history-server
 
-![install_spark_history.jpeg](docs/img/install_spark_history.jpeg)
+![install_spark_history.jpeg](../img/install_spark_history.jpeg)
 
 ack-spark-history-server通过记录spark执行任务过程中的日志和事件信息，并提供UI界面，帮助排查问题。
 
