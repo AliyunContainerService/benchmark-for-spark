@@ -1,0 +1,51 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: tpcds-data-generation
+  namespace: default
+spec:
+  type: Scala
+  image: registry.cn-beijing.aliyuncs.com/yukong/ack-spark-benchmark:1.0.0
+  sparkVersion: 2.4.5
+  mainClass: com.aliyun.spark.benchmark.tpcds.DataGeneration
+  mainApplicationFile: "local:///opt/spark/jars/ack-spark-benchmark-assembly-0.1.jar"
+  mode: cluster
+  arguments:
+    # TPC-DS data localtion
+    - "oss://cloudnativeai/spark/data/tpc-ds-data/1000g"
+    # Path to kit in the docker image
+    - "/tmp/tpcds-kit/tools"
+    # Data Format
+    - "parquet"
+    # Scale factor (in GB)
+    - "100000"
+    # Generate data num partitions
+    - "100"
+    # Create the partitioned fact tables
+    - "false"
+    # Shuffle to get partitions coalesced into single files.
+    - "false"
+    # Logging set to WARN
+    - "true"
+  hadoopConf:
+    # OSS
+    "fs.oss.impl": "org.apache.hadoop.fs.aliyun.oss.AliyunOSSFileSystem"
+    "fs.oss.endpoint": "oss-cn-beijing-internal.aliyuncs.com"
+    "fs.oss.accessKeyId": "YOUR-ACCESS-KEY-ID"
+    "fs.oss.accessKeySecret": "YOUR-ACCESS-KEY-SECRET"
+  sparkConf:
+    "spark.kubernetes.allocation.batch.size": "100"
+    "spark.sql.adaptive.enabled": "true"
+    "spark.eventLog.enabled": "true"
+    "spark.eventLog.dir": "oss://cloudnativeai/spark/spark-events"
+  driver:
+    cores: 6
+    memory: "20480m"
+    serviceAccount: spark
+  executor:
+    instances: 20
+    cores: 8
+    memory: "61440m"
+    memoryOverhead: 2g
+  restartPolicy:
+    type: Never

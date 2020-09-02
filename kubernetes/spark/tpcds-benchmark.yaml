@@ -1,0 +1,64 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: tpcds-benchmark
+  namespace: default
+spec:
+  type: Scala
+  mode: cluster
+  image: registry.cn-beijing.aliyuncs.com/yukong/ack-spark-benchmark:1.0.0
+  imagePullPolicy: Always
+  sparkVersion: 2.4.5
+  mainClass: com.aliyun.spark.benchmark.tpcds.BenchmarkSQL
+  mainApplicationFile: "local:///opt/spark/jars/ack-spark-benchmark-assembly-0.1.jar"
+  arguments:
+    # TPC-DS data localtion
+    - "oss://cloudnativeai/spark/data/tpc-ds-data/1000g"
+    # results location
+    - "oss://cloudnativeai/spark/result/tpcds-benchmark-result-1000g"
+    # Path to kit in the docker image
+    - "/tmp/tpcds-kit/tools"
+    # Data Format
+    - "parquet"
+    # Scale factor (in GB)
+    - "1000"
+    # Number of iterations
+    - "1"
+    # Optimize queries
+    - "false"
+    # Filter queries, will run all if empty - "q70-v2.4,q82-v2.4,q64-v2.4"
+    - ""
+    # Logging set to WARN
+    - "true"
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  restartPolicy:
+    type: Never
+  timeToLiveSeconds: 86400
+  hadoopConf:
+    # OSS
+    "fs.oss.impl": "org.apache.hadoop.fs.aliyun.oss.AliyunOSSFileSystem"
+    "fs.oss.endpoint": "oss-cn-beijing-internal.aliyuncs.com"
+    "fs.oss.accessKeyId": "YOUR-ACCESS-KEY-ID"
+    "fs.oss.accessKeySecret": "YOUR-ACCESS-KEY-SECRET"
+  sparkConf:
+    "spark.kubernetes.allocation.batch.size": "200"
+    "spark.sql.adaptive.join.enabled": "true"
+    "spark.eventLog.enabled": "true"
+    "spark.eventLog.dir": "oss://cloudnativeai/spark/spark-events"
+  driver:
+    cores: 5
+    memory: "20480m"
+    labels:
+      version: 2.4.5
+      spark-app: spark-tpcds
+      role: driver
+    serviceAccount: spark
+  executor:
+    cores: 7
+    instances: 20
+    memory: "20480m"
+    memoryOverhead: "8g"
+    labels:
+      version: 2.4.5
+      role: executor
