@@ -23,8 +23,6 @@
 
 在大数据生态系统中，Alluxio 位于数据驱动框架或应用（如 Apache Spark、Presto、Tensorflow、Apache Flink 等）和各种持久化存储系统（如 Amazon S3、Google Cloud Storage、Alibaba OSS 等）之间。 Alluxio 统一了存储在这些不同存储系统中的数据，为其上层数据驱动型应用提供统一的客户端 API 和全局命名空间。
 
-![alluxio-overview.jpg](docs/img/alluxio-overview.jpg)
-
 我们将会采用Alluxio通过缓存的方式加速Spark访问持久化存储系统中的数据。
 
 
