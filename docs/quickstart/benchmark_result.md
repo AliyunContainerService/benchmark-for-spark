@@ -38,7 +38,7 @@ alluxio version: 2.3.0
 
 ### Spark是否启用Alluxio对比
 
-![tpcds_per_query.jpeg](docs/img/tpcds_per_query.jpeg)
+![tpcds_per_query.jpeg](../img/tpcds_per_query.jpeg)
 
 query任务总耗时
 
@@ -52,4 +52,4 @@ query任务总耗时
 
 
 
-![spark_vs_alluxio.jpg](docs/img/spark_vs_alluxio.jpg)
+![spark_vs_alluxio.jpg](../img/spark_vs_alluxio.jpg)

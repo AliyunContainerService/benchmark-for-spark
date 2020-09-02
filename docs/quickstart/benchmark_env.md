@@ -121,7 +121,7 @@ tieredstore:
 
 tieredstore中的中的mediumtype、path对应ack worker节点中挂载的数据盘。
 
-完整的配置文件请参考[config.yaml](kubernetes/alluxio/config.yaml)，下载config.yaml配置文件并修改配置，给ACK集群中的worker节点打上“alluxio=true”标签，然后通过helm命令安装alluxio。
+完整的配置文件请参考[config.yaml](../../kubernetes/alluxio/config.yaml)，下载config.yaml配置文件并修改配置，给ACK集群中的worker节点打上“alluxio=true”标签，然后通过helm命令安装alluxio。
 
 安装alluxio
 
@@ -145,4 +145,4 @@ kubectl exec -it alluxio-master-0 -n alluxio -- /bin/bash
 
 如果能看到每个worker节点上都有挂载的数据盘，说明Alluxio安装配置成功。
 
-![alluxio_capacity.png](docs/img/alluxio_capacity.png)
+![alluxio_capacity.png](../img/alluxio_capacity.png)
