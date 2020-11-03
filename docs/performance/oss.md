@@ -5,4 +5,4 @@ fs.oss.multipart.download.threads: 32
 fs.oss.max.total.tasks: 256
 fs.oss.connection.maximum: 2048
 ```
-更多配置可参考[hadoop aliyun](https://hadoop.apache.org/docs/stable/hadoop-aliyun/tools/hadoop-aliyun/index.html)
+更多配置可参考[hadoop-aliyun](https://hadoop.apache.org/docs/stable/hadoop-aliyun/tools/hadoop-aliyun/index.html)
