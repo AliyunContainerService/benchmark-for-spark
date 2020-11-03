@@ -132,3 +132,5 @@ spec:
       - name: TZ
         value: "Asia/Shanghai"
 ```
+完整YAML文件可参考[tpcds-data-generation](../../kubernetes/emr/tpcds-data-generation.yaml)，其中spec.mainApplicationFile中的jar包
+可通过这里[下载](../../kubernetes/emr/jar/spark-sql-perf-assembly-0.5.0-SNAPSHOT.jar)，放在自己的OSS中。

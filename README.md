@@ -36,10 +36,13 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
 
 ## 性能优化
 
+为了提高在Kubernetes运行工作负载时的性能和易用性，并降低成本，阿里云EMR和ACK团队做了很多优化工作，主要有以下这些：
+
 - [Spark Operator优化](docs/performance/spark-operator.md)
 - [Spark优化](docs/performance/emr-spark.md)
 - [Shuffle优化](docs/performance/remote-shuffle-service.md)
 - [分布式缓存优化](docs/performance/jindofs.md)
+- [Serverless架构](docs/performance/serverless.md)
 
 ## 最佳实践
 
