@@ -33,6 +33,11 @@ spec:
     "fs.oss.endpoint": "<YOUR-OSS-ENDPOINT>"
     "fs.oss.accessKeyId": "<YOUR-ACCESS-KEY-ID>"
     "fs.oss.accessKeySecret": "<YOUR-ACCESS-KEY-SECRET>"
+    # OSS performance best practice
+    "fs.oss.paging.maximum": 1000
+    "fs.oss.multipart.download.threads": 32
+    "fs.oss.max.total.tasks": 256
+    "fs.oss.connection.maximum": 2048
   sparkConf:
     "spark.kubernetes.allocation.batch.size": "100"
     "spark.sql.adaptive.enabled": "true"
