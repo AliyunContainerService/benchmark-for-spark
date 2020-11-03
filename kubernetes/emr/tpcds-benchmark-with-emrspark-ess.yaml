@@ -1,0 +1,115 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: tpcds-benchmark-emrspark-ess-10t
+  namespace: default
+spec:
+  type: Scala
+  mode: cluster
+  image: registry.cn-beijing.aliyuncs.com/zf-spark/spark-2.4.5:for-tpc-ds-2
+  imagePullPolicy: Always
+  mainClass: com.databricks.spark.sql.perf.tpcds.TPCDS_Standalone
+  mainApplicationFile: "oss://<YOUR-BUCKET>/jars/spark-sql-perf-assembly-0.5.0-SNAPSHOT.jar"
+  arguments:
+    - "--dataset_location"
+    - "oss://<YOUR-BUCKET>/datasets/"
+    - "--output_location"
+    - "oss://<YOUR-BUCKET>/outputs/ack-pr-10t-emr-with-ess"
+    - "--iterations"
+    - "1"
+    - "--shuffle_partitions"
+    - "1000"
+    - "--scale_factor"
+    - "10000"
+    - "--regenerate_dataset"
+    - "false"
+    - "--regenerate_metadata"
+    - "false"
+    - "--only_generate_data_and_meta"
+    - "false"
+    - "--format"
+    - "parquet"
+    - "--query_exclude_list"
+    - "q14a,q14b,q67"
+  sparkVersion: 2.4.5
+  restartPolicy:
+    type: Never
+  hadoopConf:
+    "fs.oss.impl": "org.apache.hadoop.fs.aliyun.oss.AliyunOSSFileSystem"
+    "fs.oss.endpoint": "<YOUR-OSS-ENDPOINT>"
+    "fs.oss.accessKeyId": "<YOUR-ACCESS-KEY-ID>"
+    "fs.oss.accessKeySecret": "<YOUR-ACCESS-KEY-SECRET>"
+    hive.metastore.uris: thrift://service-hive-metastore.default:9083
+    hive.metastore.client.socket.timeout: 600s
+  sparkConf:
+    spark.eventLog.enabled: "true"
+    spark.eventLog.dir: "oss://<YOUR-BUCKET>/spark/eventlogs"
+    spark.driver.extraJavaOptions: "-XX:-PrintGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps"
+    spark.driver.maxResultSize: 40g
+    spark.executor.extraJavaOptions: "-XX:MaxDirectMemorySize=6g -XX:-PrintGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps"
+    spark.locality.wait.node: "0"
+    spark.locality.wait.process: "0"
+    spark.locality.wait.rack: "0"
+    spark.locality.wait: "0"
+    spark.memory.fraction: "0.8"
+    spark.memory.offHeap.enabled: "false"
+    spark.memory.offHeap.size: "17179869184"
+    spark.sql.adaptive.bloomFilterJoin.enabled: "false"
+    spark.sql.adaptive.enabled: "false"
+    spark.sql.analyze.column.async.delay: "200"
+    spark.sql.auto.reused.cte.enabled: "true"
+    spark.sql.broadcastTimeout: "3600"
+    spark.sql.columnVector.offheap.enabled: "false"
+    spark.sql.crossJoin.enabled: "true"
+    spark.sql.delete.optimizeInSubquery: "true"
+    spark.sql.dynamic.runtime.filter.bbf.enabled: "false"
+    spark.sql.dynamic.runtime.filter.enabled: "true"
+    spark.sql.dynamic.runtime.filter.exact.enabled: "true"
+    spark.sql.dynamic.runtime.filter.table.size.lower.limit: "1069547520"
+    spark.sql.dynamic.runtime.filter.table.size.upper.limit: "5368709120"
+    spark.sql.files.openCostInBytes: "34108864"
+    spark.sql.inMemoryColumnarStorage.compressed: "true"
+    spark.sql.join.preferNativeJoin: "false"
+    spark.sql.native.codecache: "true"
+    spark.sql.native.codegen.wholeStage: "false"
+    spark.sql.native.nativewrite: "false"
+    spark.sql.pkfk.optimize.enable: "true"
+    spark.sql.pkfk.riJoinElimination: "true"
+    spark.sql.shuffle.partitions: "1000"
+    spark.sql.simplifyDecimal.enabled: "true"
+    spark.sql.sources.parallelPartitionDiscovery.parallelism: "432"
+    spark.sql.sources.parallelPartitionDiscovery.threshold: "32"
+    spark.shuffle.reduceLocality.enabled: "false"
+    spark.shuffle.service.enabled: "true"
+    spark.dynamicAllocation.enabled: "false"
+    spark.shuffle.manager: org.apache.spark.shuffle.ess.EssShuffleManager
+    spark.ess.master.host: emr-rss-master.spark-rss
+    spark.ess.master.port: "9099"
+    spark.ess.push.data.buffer.size: 64k
+    spark.ess.push.data.max.inflight: "2048"
+    spark.ess.rpc.io.clientThreads: "8"
+    spark.ess.rpc.io.serverThreads: "8"
+    spark.ess.data.io.clientThreads: "8"
+    spark.ess.data.io.numConnectionsPerPeer: "8"
+  driver:
+    cores: 15
+    coreLimit: 15000m
+    memory: 50g
+    labels:
+      version: 2.4.5
+    serviceAccount: spark
+    env:
+      - name: TZ
+        value: "Asia/Shanghai"
+  executor:
+    cores: 4
+    coreLimit: 6000m
+    instances: 20
+    memory: 24g
+    memoryOverhead: 10g
+    deleteOnTermination: false
+    labels:
+      version: 2.4.5
+    env:
+      - name: TZ
+        value: "Asia/Shanghai"

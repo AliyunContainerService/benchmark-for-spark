@@ -1,5 +1,3 @@
-本项目包含在ACK上运行Spark工作负载的最佳实践和benchmark结果。
-
 ## 为什么要在Kubernetes上运行Spark
 
 从spark 2.3版本开始，我们可以在Kubernetes上运行和管理Spark资源。在此之前，只能在Hadoop Yarn、Apache Mesos或独立集群上运行Spark。在Kubernetes上运行Spark应用有以下优点：
@@ -11,20 +9,11 @@
 
 - 把Spark和管理数据生命周期的应用运行在同一个集群中，可以使用单个编排机制构建端到端生命周期的解决方案，并能很容易的复制到其他区域部署，甚至是在私有化环境部署。
 
+阿里云容器服务Kubernetes版（简称 ACK）提供高性能可伸缩的容器应用管理能力，支持企业级容器化应用的全生命周期管理。整合阿里云虚拟化、存储、网络和安全能力，打造云端最佳容器化应用运行环境，我们将介绍在在ACK上运行Spark工作负载的最佳实践和benchmark结果。
 
 ## Spark on Kubernetes Operator
 
 [Spark on Kubernetes Operator](https://github.com/AliyunContainerService/spark-on-k8s-operator)帮助用户在Kubernetes上像其他工作负载一样用通用的方式运行Spark Application，它使用Kubernetes custom resources来配置、运行Spark Application，并展现其状态，需要Spark 2.3及以上的版本来支持Kubernetes调度。
-
-
-## Alluxio
-
-[Alluxio](https://www.alluxio.io/)是一个面向基于云的数据分析和人工智能的开源的数据编排技术。 它为数据驱动型应用和存储系统构建了桥梁, 将数据从存储层移动到距离数据驱动型应用更近的位置从而能够更容易被访问。 这还使得应用程序能够通过一个公共接口连接到许多存储系统。 Alluxio内存至上的层次化架构使得数据的访问速度能比现有方案快几个数量级。
-
-在大数据生态系统中，Alluxio 位于数据驱动框架或应用（如 Apache Spark、Presto、Tensorflow、Apache Flink 等）和各种持久化存储系统（如 Amazon S3、Google Cloud Storage、Alibaba OSS 等）之间。 Alluxio 统一了存储在这些不同存储系统中的数据，为其上层数据驱动型应用提供统一的客户端 API 和全局命名空间。
-
-我们将会采用Alluxio通过缓存的方式加速Spark访问持久化存储系统中的数据。
-
 
 ## TPC-DS Benchmark
 
@@ -43,16 +32,21 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
 
 ## 快速开始
 
-在ACK上搭建环境并运行Spark TPC-DS benchmark的教程请参考[快速开始](docs/quickstart/benchmark_env.md)。
+我们从在ACK上搭建环境，并运行社区版Spark和分布式缓存框架Alluxio开始，介绍如何在ACK运行Spark工作负载，详情请参考[快速开始](docs/quickstart/benchmark_env.md)。
 
 ## 性能优化
 
-- [Kubernetes集群优化](docs/performance/kubernetes.md)
-- [Spark Operator优化](docs/performance/operator.md)
+- [Spark Operator优化](docs/performance/spark-operator.md)
 - [Spark优化](docs/performance/emr-spark.md)
-- [Shuffle优化](docs/performance/shuffle.md)
-- [分布式缓存优化](docs/performance/alluxio.md)
-- [调度优化](docs/performance/scheduler.md)
+- [Shuffle优化](docs/performance/remote-shuffle-service.md)
+- [分布式缓存优化](docs/performance/jindofs.md)
+
+## 最佳实践
+
+- [使用EMR Spark运行Spark工作负载](./docs/bestpractice/emrspark.md)
+- [使用EMR Spark + Remote Shuffle Service运行Spark工作负载](./docs/bestpractice/emrspark-ess.md)
+- [使用EMR Spark + JindoFS运行Spark工作负载](./docs/bestpractice/emrspark-jindofs.md)
+- [使用EMR Spark + JindoFS + Remote Shuffle Service运行Spark工作负载](./docs/bestpractice/emrspark-ess-jindofs.md)
 
 ## 鸣谢
 本项目参考了[eks-spark-benchmark](https://github.com/aws-samples/eks-spark-benchmark)，感谢其优秀的工作。

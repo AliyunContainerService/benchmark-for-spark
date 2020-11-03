@@ -1,0 +1,108 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: tpcds-benchmark-emrspark-ess-jindofs-1t
+  namespace: default
+spec:
+  type: Scala
+  mode: cluster
+  image: registry.cn-beijing.aliyuncs.com/zf-spark/spark-2.4.5:for-tpc-ds-2
+  imagePullPolicy: Always
+  mainClass: com.databricks.spark.sql.perf.tpcds.TPCDS_Standalone
+  mainApplicationFile: "jfs://default/jars/spark-sql-perf-assembly-0.5.0-SNAPSHOT.jar"
+  arguments:
+    - "--dataset_location"
+    - "jfs://default/datasets/"
+    - "--output_location"
+    - "jfs://default/results-1t/"
+    - "--iterations"
+    - "1"
+    - "--shuffle_partitions"
+    - "1000"
+    - "--scale_factor"
+    - "1000"
+    - "--regenerate_dataset"
+    - "false"
+    - "--regenerate_metadata"
+    - "false"
+    - "--only_generate_data_and_meta"
+    - "false"
+    - "--db_suffix"
+    - "cluster_180405"
+    - "--query_exclude_list"
+    - "q23a,q23b,q24a,q24b,q77"
+    - "--format"
+    - "parquet"
+  sparkVersion: 2.4.5
+  restartPolicy:
+    type: Never
+  sparkConf:
+    spark.driver.extraLibraryPath: /opt/spark/lib/native
+    spark.executor.extraLibraryPath: /opt/spark/lib/native
+    #CBO
+    spark.sql.cbo.enabled: "true"
+    spark.sql.cbo.joinReorder.enabled: "true"
+    spark.sql.cbo.joinReorder.dp.star.filter: "false"
+    spark.sql.cbo.joinReorder.dp.threshold: "12"
+    spark.sql.cbo.outerJoinReorder.enabled: "true"
+    #RF
+    spark.sql.dynamic.runtime.filter.enabled: "true"
+    spark.sql.dynamic.runtime.filter.bbf.enabled: "false"
+    spark.sql.dynamic.runtime.filter.table.size.lower.limit: "1069547520"
+    spark.sql.dynamic.runtime.filter.table.size.upper.limit: "5368709120"
+    spark.sql.emr.fileindex.enabled: "false"
+    spark.sql.intersect.groupby.placement: "true"
+    spark.sql.extract.common.conjunct.filter: "true"
+    spark.sql.infer.filter.from.joincondition: "true"
+    spark.dynamicAllocation.enabled: "false"
+    spark.ess.master.host: emr-rss-master.spark-rss
+    spark.ess.master.port: "9099"
+    spark.ess.rpc.io.clientThreads: "8"
+    spark.ess.data.io.clientThreads: "8"
+    spark.ess.data.io.numConnectionsPerPeer: "8"
+    spark.ess.data.io.mode: NIO
+    spark.shuffle.manager: org.apache.spark.shuffle.ess.EssShuffleManager
+    spark.sql.uncorrelated.scalar.subquery.preexecution.enabled: "true"
+  driver:
+    cores: 5
+    coreLimit: 5000m
+    memory: 20g
+    labels:
+      version: 2.4.5
+    serviceAccount: spark
+    env:
+      - name: TZ
+        value: "Asia/Shanghai"
+      - name: CLIENT_NAMESPACE_RPC_ADDRESS
+        value: jindofs-master.jindofs:8101
+      - name: CLIENT_STORAGE_RPC_PORT
+        value: "6101"
+      - name: CLIENT_STORAGE_RPC_HOST
+        valueFrom:
+          fieldRef:
+            fieldPath: status.hostIP
+      - name: JFS_CACHE_DATA_CACHE_ENABLE
+        value: "1"
+  executor:
+    cores: 7
+    coreLimit: 7000m
+    instances: 20
+    memory: 20g
+    memoryOverhead: 6g
+    labels:
+      version: 2.4.5
+    env:
+      - name: SPARKLOGENV
+        value: spark-executor
+      - name: TZ
+        value: "Asia/Shanghai"
+      - name: CLIENT_NAMESPACE_RPC_ADDRESS
+        value: jindofs-master.jindofs:8101
+      - name: CLIENT_STORAGE_RPC_PORT
+        value: "6101"
+      - name: CLIENT_STORAGE_RPC_HOST
+        valueFrom:
+          fieldRef:
+            fieldPath: status.hostIP
+      - name: JFS_CACHE_DATA_CACHE_ENABLE
+        value: "1"

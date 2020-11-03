@@ -12,7 +12,7 @@ spec:
   mode: cluster
   arguments:
     # TPC-DS data localtion
-    - "oss://cloudnativeai/spark/data/tpc-ds-data/1000g"
+    - "oss://<YOUR-BUCKET>/spark/data/tpc-ds-data/1000g"
     # Path to kit in the docker image
     - "/tmp/tpcds-kit/tools"
     # Data Format
@@ -30,14 +30,14 @@ spec:
   hadoopConf:
     # OSS
     "fs.oss.impl": "org.apache.hadoop.fs.aliyun.oss.AliyunOSSFileSystem"
-    "fs.oss.endpoint": "oss-cn-beijing-internal.aliyuncs.com"
-    "fs.oss.accessKeyId": "YOUR-ACCESS-KEY-ID"
-    "fs.oss.accessKeySecret": "YOUR-ACCESS-KEY-SECRET"
+    "fs.oss.endpoint": "<YOUR-OSS-ENDPOINT>"
+    "fs.oss.accessKeyId": "<YOUR-ACCESS-KEY-ID>"
+    "fs.oss.accessKeySecret": "<YOUR-ACCESS-KEY-SECRET>"
   sparkConf:
     "spark.kubernetes.allocation.batch.size": "100"
     "spark.sql.adaptive.enabled": "true"
     "spark.eventLog.enabled": "true"
-    "spark.eventLog.dir": "oss://cloudnativeai/spark/spark-events"
+    "spark.eventLog.dir": "oss://<YOUR-BUCKET>/spark/spark-events"
   driver:
     cores: 6
     memory: "20480m"

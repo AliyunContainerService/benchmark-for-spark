@@ -15,7 +15,7 @@ spec:
     # TPC-DS data localtion
     - "alluxio://alluxio-master-0.alluxio.svc.cluster.local:19998/spark/data/tpc-ds-data/1000g"
     # results location
-    - "oss://cloudnativeai/spark/result/tpcds-benchmark-result-1000g-with-alluxio"
+    - "oss://<YOUR-BUCKET>/spark/result/tpcds-benchmark-result-1000g-with-alluxio"
     # Path to kit in the docker image
     - "/tmp/tpcds-kit/tools"
     # Data Format
@@ -38,14 +38,14 @@ spec:
   hadoopConf:
     # OSS
     "fs.oss.impl": "org.apache.hadoop.fs.aliyun.oss.AliyunOSSFileSystem"
-    "fs.oss.endpoint": "oss-cn-beijing-internal.aliyuncs.com"
-    "fs.oss.accessKeyId": "YOUR-ACCESS-KEY-ID"
-    "fs.oss.accessKeySecret": "YOUR-ACCESS-KEY-SECRET"
+    "fs.oss.endpoint": "<YOUR-OSS-ENDPOINT>"
+    "fs.oss.accessKeyId": "<YOUR-ACCESS-KEY-ID>"
+    "fs.oss.accessKeySecret": "<YOUR-ACCESS-KEY-SECRET>"
   sparkConf:
     "spark.kubernetes.allocation.batch.size": "200"
     "spark.sql.adaptive.join.enabled": "true"
     "spark.eventLog.enabled": "true"
-    "spark.eventLog.dir": "oss://cloudnativeai/spark/spark-events"
+    "spark.eventLog.dir": "oss://<YOUR-BUCKET>/spark/spark-events"
   volumes:
     - name: "spark-local-dir-1"
       hostPath:
