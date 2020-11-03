@@ -41,6 +41,7 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
 - [Spark Operator优化](docs/performance/spark-operator.md)
 - [Spark优化](docs/performance/emr-spark.md)
 - [Shuffle优化](docs/performance/remote-shuffle-service.md)
+- [OSS优化](docs/performance/oss.md)
 - [分布式缓存优化](docs/performance/jindofs.md)
 - [Serverless架构](docs/performance/serverless.md)
 
