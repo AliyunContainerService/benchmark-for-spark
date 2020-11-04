@@ -45,6 +45,35 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
 - [分布式缓存优化](docs/performance/jindofs.md)
 - [Serverless架构](docs/performance/serverless.md)
 
+
+## 性能对比
+
+1. Apache vs EMR Spark
+   
+   测试数据：10TB
+   
+   ![apache-spark-per-10t](./docs/img/apache-spark-per-10t.jpg)
+   
+   ![apache-spark-total-10t](./docs/img/apache-spark-total-10t.jpg)
+   
+2. EMR Spark vs EMR Spark + Remote Shuffle Service
+
+   测试数据：10TB
+   
+   ![emr-spark-rss-per-10t](./docs/img/emr-spark-rss-per-10t.jpg)
+        
+   ![emr-spark-rss-total-10t](./docs/img/emr-spark-rss-total-10t.jpg)
+
+
+3. EMR Spark vs EMR Spark + JindoFS
+
+   测试数据：1TB
+   
+   ![emr-spark-jindofs-per-1t](./docs/img/emr-spark-jindofs-per-1t.jpg)
+            
+   ![emr-spark-jindofs-total-1t](./docs/img/emr-spark-jindofs-total-1t.jpg)
+    
+
 ## 最佳实践
 
 - [使用EMR Spark运行Spark工作负载](./docs/bestpractice/emrspark.md)
