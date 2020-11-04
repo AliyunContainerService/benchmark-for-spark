@@ -48,7 +48,7 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
 
 ## 性能对比
 
-1. Apache vs EMR Spark
+1. Apache Spark vs EMR Spark
    
    测试数据：10TB
    
