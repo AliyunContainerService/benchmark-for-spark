@@ -47,6 +47,16 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
 
 
 ## 性能对比
+### 集群环境
+
+| 集群配置        | 参数                                                         |
+| --------------- | ------------------------------------------------------------ |
+| 集群类型        | ACK标准集群                                                  |
+| 集群版本        | 1.16.9-aliyun.1                                              |
+| ECS实例         | ECS规格：ecs.d1ne.6xlarge<br>操作系统：CentOS 7.7 64位<br>CPU：24核<br>内存：96G<br>数据盘：5500GB HDDx12 |
+| Worker Node个数 | 20                                                           |
+
+### 对比结果
 
 1. Apache Spark vs EMR Spark
    
@@ -56,6 +66,8 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
    
    ![apache-spark-total-10t](./docs/img/apache-spark-total-10t.jpg)
    
+   在10TB数据上测试，EMR Spark相比社区版Apache Spark约有57%的性能提升，详细测试过程参考[使用EMR Spark运行Spark工作负载](./docs/bestpractice/emrspark.md)。
+   
 2. EMR Spark vs EMR Spark + Remote Shuffle Service
 
    测试数据：10TB
@@ -63,6 +75,8 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
    ![emr-spark-rss-per-10t](./docs/img/emr-spark-rss-per-10t.jpg)
         
    ![emr-spark-rss-total-10t](./docs/img/emr-spark-rss-total-10t.jpg)
+   
+   在10TB数据上，增加Shuffle Service后，相比直接使用EMR Spark，约有16%的性能提升。详细测试过程请参考[使用EMR Spark + Remote Shuffle Service运行Spark工作负载](./docs/bestpractice/emrspark-ess.md)。
 
 
 3. EMR Spark vs EMR Spark + JindoFS
@@ -72,7 +86,9 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
    ![emr-spark-jindofs-per-1t](./docs/img/emr-spark-jindofs-per-1t.jpg)
             
    ![emr-spark-jindofs-total-1t](./docs/img/emr-spark-jindofs-total-1t.jpg)
-    
+   
+   在1TB数据上，使用JindoFS做数据分布式缓存后，相比直接使用EMR Spark，得到约15%性能提升。详细测试过程请参考[使用EMR Spark + JindoFS运行Spark工作负载](./docs/bestpractice/emrspark-jindofs.md)。
+   
 
 ## 最佳实践
 
