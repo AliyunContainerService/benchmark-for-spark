@@ -1,6 +1,26 @@
-.DS_Store
-.idea
+# Class files
 target/
-project/target/
-project/project/target/
 
+# SBT
+.metals/
+.bsp/
+
+# Benchmark
+benchmark/*/values.yaml
+config/benchmark.properties
+config/values.yaml
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+.terraform.tfstate.lock.info
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+
+# Various IDEs
+.idea/
+.vscode/
+
+# Mac OS
+.DS_Store
