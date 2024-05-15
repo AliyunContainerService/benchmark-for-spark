@@ -1,21 +1,25 @@
-## 为什么要在Kubernetes上运行Spark
+# Spark on ACK 最佳实践和基准测试
 
-从spark 2.3版本开始，我们可以在Kubernetes上运行和管理Spark资源。在此之前，只能在Hadoop Yarn、Apache Mesos或独立集群上运行Spark。在Kubernetes上运行Spark应用有以下优点：
+## 概述
 
-- 通过把Spark应用和依赖项打包成容器，享受容器的各种优点，很容易的解决Hadoop版本不匹配和兼容性问题。还可以给容器镜像打上标签控制版本，这样如果需要测试不同版本的Spark或者依赖项的话，选择对应的版本做到了。
+### 为什么要在 Kubernetes 上运行 Spark？
 
-- 重用Kubernetes生态的各种组件，比如监控、日志。把Spark工作负载部署在已有的的Kubernetes基础设施中，能够快速开始工作，大大减少了运维成本。
-- 支持多租户，可利用Kubernetes的namespace和ResourceQuota做用户粒度的资源调度，利用Kubernetes的节点选择机制保证Spark工作负载得到专用的资源。另外，由于driver pods创建executor pods，我们可以用Kubernetes service account控制权限，利用Role或者Cluster Role定义细粒度访问权限，安全的运行工作负载，避免受其他工作负载影响。
+从 Spark 2.3 版本开始，我们可以在 Kubernetes 上运行和管理 Spark 资源。在此之前，只能在 Hadoop Yarn、Apache Mesos 或独立集群上运行 Spark。在 Kubernetes 上运行Spark应用有以下优点：
 
-- 把Spark和管理数据生命周期的应用运行在同一个集群中，可以使用单个编排机制构建端到端生命周期的解决方案，并能很容易的复制到其他区域部署，甚至是在私有化环境部署。
+- **标准化**：通过把 Spark 应用机器依赖项打包成容器镜像，享受容器的各种优点，很容易的解决Hadoop版本不匹配和兼容性问题。还可以给容器镜像打上标签控制版本，这样如果需要测试不同版本的Spark或者依赖项的话，选择对应的版本做到了。
 
-阿里云容器服务Kubernetes版（简称 ACK）提供高性能可伸缩的容器应用管理能力，支持企业级容器化应用的全生命周期管理。整合阿里云虚拟化、存储、网络和安全能力，打造云端最佳容器化应用运行环境，我们将介绍在在ACK上运行Spark工作负载的最佳实践和benchmark结果。
+- **复用 Kubernetes 生态**：重用 Kubernetes 生态的各种组件，比如监控、日志。把Spark工作负载部署在已有的的 Kubernetes 基础设施中，能够快速开始工作，大大减少了运维成本。
+- **支持多租户**，可利用 Kubernetes 的 namespace 和 ResourceQuota 做用户粒度的资源调度，利用 Kubernetes 的节点选择机制保证 Spark 工作负载得到专用的资源。另外，由于 driver pods 创建 executor pods，我们可以用 Kubernetes service account 控制权限，利用Role或者Cluster Role定义细粒度访问权限，安全的运行工作负载，避免受其他工作负载影响。
 
-## Spark on Kubernetes Operator
+- 把 Spark 和管理数据生命周期的应用运行在同一个集群中，可以使用单个编排机制构建端到端生命周期的解决方案，并能很容易的复制到其他区域部署，甚至是在私有化环境部署。
 
-[Spark on Kubernetes Operator](https://github.com/AliyunContainerService/spark-on-k8s-operator)帮助用户在Kubernetes上像其他工作负载一样用通用的方式运行Spark Application，它使用Kubernetes custom resources来配置、运行Spark Application，并展现其状态，需要Spark 2.3及以上的版本来支持Kubernetes调度。
+阿里云容器服务 Kubernetes 版（简称 ACK）提供高性能可伸缩的容器应用管理能力，支持企业级容器化应用的全生命周期管理。整合阿里云虚拟化、存储、网络和安全能力，打造云端最佳容器化应用运行环境。本文将介绍在 ACK 集群中运行 Spark 工作负载的最佳实践和基准测试结果。
 
-## TPC-DS Benchmark
+### Spark Operator
+
+[Spark Operator](https://github.com/kubeflow/spark-operator) 帮助用户在 Kubernetes 上像其他工作负载一样用通用的方式运行 Spark 作业，它使用 Kubernetes 自定义资源（CR）来配置、运行 Spark Application，并展现其状态，需要 Spark 2.3 及以上的版本来支持 Kubernetes 调度。
+
+### TPC-DS 基准测试
 
 [TPC-DS](http://www.tpc.org/tpcds/)由第三方社区创建和维护，是事实上的做性能压测，协助确定解决方案的工业标准。这个测试集包含对大数据集的统计、报表生成、联机查询、数据挖掘等复杂应用，测试用的数据和值是有倾斜的，与真实数据一致。可以说TPC-DS是与真实场景非常接近的一个测试集，也是难度较大的一个测试集。
 
@@ -45,8 +49,8 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
 - [分布式缓存优化](docs/performance/jindofs.md)
 - [Serverless架构](docs/performance/serverless.md)
 
-
 ## 性能对比
+
 ### 集群环境
 
 | 集群配置        | 参数                                                         |
@@ -59,36 +63,34 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
 ### 对比结果
 
 1. Apache Spark vs EMR Spark
-   
+
    测试数据：10TB
-   
+
    ![apache-spark-per-10t](./docs/img/apache-spark-per-10t.jpg)
-   
+
    ![apache-spark-total-10t](./docs/img/apache-spark-total-10t.jpg)
-   
+
    在10TB数据上测试，EMR Spark相比社区版Apache Spark约有57%的性能提升，详细测试过程参考[使用EMR Spark运行Spark工作负载](./docs/bestpractice/emrspark.md)。
-   
+
 2. EMR Spark vs EMR Spark + Remote Shuffle Service
 
    测试数据：10TB
-   
-   ![emr-spark-rss-per-10t](./docs/img/emr-spark-rss-per-10t.jpg)
-        
-   ![emr-spark-rss-total-10t](./docs/img/emr-spark-rss-total-10t.jpg)
-   
-   在10TB数据上，增加Shuffle Service后，相比直接使用EMR Spark，约有16%的性能提升。详细测试过程请参考[使用EMR Spark + Remote Shuffle Service运行Spark工作负载](./docs/bestpractice/emrspark-ess.md)。
 
+   ![emr-spark-rss-per-10t](./docs/img/emr-spark-rss-per-10t.jpg)
+
+   ![emr-spark-rss-total-10t](./docs/img/emr-spark-rss-total-10t.jpg)
+
+   在10TB数据上，增加Shuffle Service后，相比直接使用EMR Spark，约有16%的性能提升。详细测试过程请参考[使用EMR Spark + Remote Shuffle Service运行Spark工作负载](./docs/bestpractice/emrspark-ess.md)。
 
 3. EMR Spark vs EMR Spark + JindoFS
 
    测试数据：1TB
-   
+
    ![emr-spark-jindofs-per-1t](./docs/img/emr-spark-jindofs-per-1t.jpg)
-            
+
    ![emr-spark-jindofs-total-1t](./docs/img/emr-spark-jindofs-total-1t.jpg)
-   
+
    在1TB数据上，使用JindoFS做数据分布式缓存后，相比直接使用EMR Spark，得到约15%性能提升。详细测试过程请参考[使用EMR Spark + JindoFS运行Spark工作负载](./docs/bestpractice/emrspark-jindofs.md)。
-   
 
 ## 最佳实践
 
@@ -96,6 +98,3 @@ TPC-DS包含104个query，覆盖了SQL 2003的大部分标准，有99条压测qu
 - [使用EMR Spark + Remote Shuffle Service运行Spark工作负载](./docs/bestpractice/emrspark-ess.md)
 - [使用EMR Spark + JindoFS运行Spark工作负载](./docs/bestpractice/emrspark-jindofs.md)
 - [使用EMR Spark + JindoFS + Remote Shuffle Service运行Spark工作负载](./docs/bestpractice/emrspark-ess-jindofs.md)
-
-## 鸣谢
-本项目参考了[eks-spark-benchmark](https://github.com/aws-samples/eks-spark-benchmark)，感谢其优秀的工作。
