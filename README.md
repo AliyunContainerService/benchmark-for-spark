@@ -200,3 +200,7 @@ TPC-DS 基准测试总包含 99 条压测查询，其中有 4 条查询包含 2 
 ### Apache Spark v.s. EMR Spark
 
 阿里云 EMR Spark 基于开源的 Apache Spark 做了大量优化，下面将在同一 ACK 集群环境中分别使用 Apache Spark 和 EMR Spark 运行相同的规模的 TPC-DS 基准测试，基准测试的配置和结果请参考 [Apache Spark v.s. EMR Spark](docs/benchmark/apache-spark-vs-emr-spark.md)。
+
+### Spark on ECS v.s. on ACK
+
+Spark 作业可以以非容器化的方式直接运行在 ECS 中，也可以以容器化的方式运行在 ACK 集群中，下面将在相同数量和相同规格的 ECS 集群和 ACK 集群中分别运行相同规模的 TPC-DS 基准测试，以对比容器化和非容器化环境下的性能差异，基准测试的配置和结果请参考 [Spark on ECS v.s. on ACK](docs/benchmark/spark-on-ecs-vs-on-ack/index.md)。
