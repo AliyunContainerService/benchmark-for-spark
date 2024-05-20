@@ -204,3 +204,7 @@ TPC-DS 基准测试总包含 99 条压测查询，其中有 4 条查询包含 2 
 ### Spark on ECS v.s. on ACK
 
 Spark 作业可以以非容器化的方式直接运行在 ECS 中，也可以以容器化的方式运行在 ACK 集群中，下面将在相同数量和相同规格的 ECS 集群和 ACK 集群中分别运行相同规模的 TPC-DS 基准测试，以对比容器化和非容器化环境下的性能差异，基准测试的配置和结果请参考 [Spark on ECS v.s. on ACK](docs/benchmark/spark-on-ecs-vs-on-ack/index.md)。
+
+### Spark x86 v.s. on arm64
+
+为了对比 Spark on ACK 在 x86/arm64 架构下的性能和成本，下面将在相同数量和相同规模的 x86/arm64 架构集群中分别运行相同规模的 TPC-DS 基准测试，它们具有相同的节点数量、vCPU 数量和内存大小，并挂载了相同数量和规模的云盘，区别主要在于 x86 架构集群使用了 `g7.8xlarge` 实例规格族 ECS，arm64 架构集群使用了 `g8y.8xlarge` 实例规格族 ECS，基准测试的配置和结果请参考[Spark x86 v.s. on arm64](docs/benchmark/spark-on-x86-vs-on-arm64/index.md)
