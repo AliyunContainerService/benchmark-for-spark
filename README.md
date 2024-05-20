@@ -171,7 +171,7 @@ kubectl delete -f spark-pi.yaml
 - [Shuffle 优化](https://developer.aliyun.com/article/772329)
 - [OSS 优化](docs/performance/oss.md)
 - [分布式缓存优化](docs/performance/jindofs.md)
-- [Serverless 架构](docs/performance/serverless.md)
+- [Serverless Spark](docs/performance/serverless-spark/index.md)
 
 ## 最佳实践
 
