@@ -1,0 +1,39 @@
+# Default values for tpcds-benchmark.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  # -- Image repository
+  repository: registry.cn-beijing.aliyuncs.com/poc/spark-tpcds-benchmark
+  # -- Image tag
+  tag: 3.3.2
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image pull secrets
+  pullSecrets: []
+  # - name: pull-secret
+
+aliyun:
+  # -- Aliyun accessKeyId
+  accessKeyId: ""
+  # -- Aliyun accessKeySecret
+  accessKeySecret: ""
+
+oss:
+  # -- OSS bucket
+  bucket: spark-on-ack-benchmark
+  # -- OSS endpoint
+  endpoint: oss-cn-beijing-internal.aliyuncs.com
+
+benchmark:
+  # -- Scale factor
+  scaleFactor: 3072
+  # -- Number of iterations
+  numIterations:  1
+  # -- Whether to optimize queries
+  optimizeQueries: false
+  # -- Filter queries, will run all if empty
+  queries: []
+  # - q70-v2.4
+  # - q82-v2.4
+  # - q64-v2.4
