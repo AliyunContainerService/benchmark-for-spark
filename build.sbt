@@ -2,7 +2,7 @@ ThisBuild / organization := "com.aliyun.ack"
 ThisBuild / version := "0.1"
 ThisBuild / scalaVersion := "2.12.18"
 
-val sparkVersion = "3.3.4"
+val sparkVersion = "3.3.2"
 
 lazy val benchmark = (project in file("."))
   .settings(
