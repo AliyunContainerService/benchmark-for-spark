@@ -1,7 +1,7 @@
 apiVersion: sparkoperator.k8s.io/v1beta2
 kind: SparkApplication
 metadata:
-  name: {{ include "tpcds-benchmark.fullname" . }}
+  name: {{ include "tpcds-benchmark.fullname" . }}-{{ .Values.benchmark.scaleFactor }}gb
   labels:
     {{- include "tpcds-benchmark.labels" . | nindent 4 }}
 spec:
@@ -20,17 +20,17 @@ spec:
   mainApplicationFile: local:///opt/spark/jars/spark-tpcds-benchmark-assembly-0.1.jar
   arguments:
   - --data
-  - oss://{{ .Values.oss.bucket }}/spark/tpcds/data/{{ .Values.benchmark.scaleFactor }}gb
+  - oss://{{ .Values.oss.bucket }}/spark/data/tpcds/{{ .Values.benchmark.scaleFactor }}gb
   - --result
-  - oss://{{ .Values.oss.bucket }}/spark/tpcds/output/{{ .Values.benchmark.scaleFactor }}gb
+  - oss://{{ .Values.oss.bucket }}/spark/result/tpcds/{{ .Values.benchmark.scaleFactor }}gb
   - --dsdgen
   - /opt/tpcds-kit/tools
   - --format
   - parquet
   - --scale-factor
-  - {{ .Values.benchmark.scaleFactor }}
+  - {{ .Values.benchmark.scaleFactor | quote }}
   - --iterations
-  - {{ .Values.benchmark.numIterations }}
+  - {{ .Values.benchmark.numIterations | quote }}
   {{- if eq .Values.benchmark.optimizeQueries true }}
   - --optimize-queries"
   {{- end }}
@@ -38,72 +38,158 @@ spec:
   - {{ .Values.benchmark.queries | join "," | quote }}
   - --only-warn
   hadoopConf:
-    "fs.oss.impl": "org.apache.hadoop.fs.aliyun.oss.AliyunOSSFileSystem"
-    "fs.oss.endpoint": "{{ .Values.oss.endpoint}}"
-    "fs.oss.accessKeyId": "{{ .Values.aliyun.accessKeyId}}"
-    "fs.oss.accessKeySecret": "{{ .Values.aliyun.accessKeySecret}}"
-    "fs.oss.paging.maximum": "1000"
-    "fs.oss.multipart.download.threads": "64"
-    "fs.oss.max.total.tasks": "640"
-    "fs.oss.connection.maximum": "2048"
-    "mapreduce.fileoutputcommitter.algorithm.version": "2"
+    fs.AbstractFileSystem.oss.impl: com.aliyun.jindodata.oss.JindoOSS
+    fs.oss.impl: com.aliyun.jindodata.oss.JindoOssFileSystem
+    fs.oss.endpoint: {{ .Values.oss.endpoint }}
+    fs.oss.credentials.provider: com.aliyun.jindodata.oss.auth.EnvironmentVariableCredentialsProvider
+    fs.oss.paging.maximum: "1000"
+    fs.oss.multipart.download.threads: "64"
+    fs.oss.max.total.tasks: "640"
+    fs.oss.connection.maximum: "2048"
+    mapreduce.fileoutputcommitter.algorithm.version: "2"
   sparkConf:
     # Application properties
-    "spark.local.dir": "/mnt/disk1,/mnt/disk2,/mnt/disk3,/mnt/disk4,/mnt/disk5,/mnt/disk6"
-    "spark.eventLog.enabled": "true"
-    "spark.eventLog.dir": "oss://{{ .Values.oss.bucket }}/spark/spark-events"
+    spark.local.dir: /mnt/disk1,/mnt/disk2,/mnt/disk3,/mnt/disk4,/mnt/disk5,/mnt/disk6
+    spark.eventLog.enabled: "true"
+    spark.eventLog.dir: oss://{{ .Values.oss.bucket }}/spark/spark-events
     # Execution Behavior
-    "spark.default.parallelism": "640"
-    "spark.driver.maxResultSize": "10g"
-    "spark.task.maxFailures": "3"
-    "spark.network.timeout": "3600"
+    spark.default.parallelism: "640"
+    spark.driver.maxResultSize: 10g
+    spark.task.maxFailures: "3"
+    spark.network.timeout: "3600"
     # Memory Management
-    "spark.memory.fraction": "0.6"
-    "spark.memory.storageFraction": "0.5"
-    # "spark.memory.offHeap.enabled": "true"
-    # "spark.memory.offHeap.size": "30g"
+    spark.memory.fraction: "0.6"
+    spark.memory.storageFraction: "0.5"
+    # "spark.memory.offHeap.enabled: "true"
+    # "spark.memory.offHeap.size: "30g"
     # Compression and Serialization
-    "spark.io.compression.codec": "snappy"
-    "spark.kryoserializer.buffer": "640k"
-    "spark.kryoserializer.buffer.max": "640m"
-    "spark.serializer": "org.apache.spark.serializer.KryoSerializer"
+    spark.io.compression.codec: snappy
+    spark.kryoserializer.buffer: 640k
+    spark.kryoserializer.buffer.max: 640m
+    spark.serializer: org.apache.spark.serializer.KryoSerializer
     # Shuffle
-    "spark.reducer.maxSizeInFlight": "128m"
-    "spark.shuffle.compress": "true"
-    "spark.shuffle.file.buffer": "64k"
-    "spark.shuffle.spill.compress": "true"
+    spark.reducer.maxSizeInFlight: 128m
+    spark.shuffle.compress: "true"
+    spark.shuffle.file.buffer: 64k
+    spark.shuffle.spill.compress: "true"
     # Spark SQL
-    "spark.sql.adaptive.enabled": "true"
-    "spark.sql.adaptive.autoBroadcastJoinThreshold": "128MB"
-    "spark.sql.autoBroadcastJoinRowThreshold": "500000"
-    "spark.sql.broadcastTimeout": "3600"
-    "spark.sql.cbo.enabled": "true"
-    "spark.sql.cbo.joinReorder.enabled": "true"
-    "spark.sql.cbo.planStats.enabled ": "true"
-    "spark.sql.cbo.starSchemaDetection": "true"
-    "spark.sql.cbo.joinReorder.card.weight": "0.6"
-    "spark.sql.cbo.joinReorder.ga.enabled": "true"
-    "spark.sql.files.minPartitionNum": "640"
-    "spark.sql.files.maxPartitionBytes": "256MB"
-    "spark.sql.hive.metastorePartitionPruning": "true"
-    "spark.sql.optimizer.runtimeFilter.semiJoinReduction.enabled": "true"
-    "spark.sql.optimizer.runtime.bloomFilter.enabled": "true"
-    "spark.sql.optimizer.runtime.bloomFilter.creationSideThreshold": "50MB"
-    "spark.sql.optimizer.runtimeFilter.number.threshold": "10"
-    "spark.sql.optimizer.dynamicFilterPruning.enabled": "true"
-    "spark.sql.optimizer.dynamicPartitionPruning.enabled": "true"
-    "spark.sql.optimizer.dynamicDataPruning.enabled": "true"
-    "spark.sql.optimizer.dynamicPartitionPruning.useStats": "true"
-    "spark.sql.optimizer.dynamicPartitionPruning.fallbackFilterRatio": "0.5"
-    "spark.sql.optimizer.dynamicPartitionPruning.reuseBroadcastOnly": "true"
-    "spark.sql.optimizer.dynamicDataPruning.pruningSideThreshold": "10GB"
-    "spark.sql.parquet.aggregatePushdown": "true"
-    "spark.sql.parquet.compression.codec": "snappy"
-    "spark.sql.parquet.filterPushdown": "true"
-    "spark.sql.parquet.mergeSchema": "false"
-    "spark.sql.rankLimit.enabled": "true"
-    "spark.sql.shuffle.partitions": "640"
+    spark.sql.adaptive.enabled: "true"
+    spark.sql.adaptive.autoBroadcastJoinThreshold": 128MB
+    spark.sql.autoBroadcastJoinRowThreshold: "500000"
+    spark.sql.broadcastTimeout: "3600"
+    spark.sql.cbo.enabled: "true"
+    spark.sql.cbo.joinReorder.enabled: "true"
+    spark.sql.cbo.planStats.enabled : "true"
+    spark.sql.cbo.starSchemaDetection: "true"
+    spark.sql.cbo.joinReorder.card.weight: "0.6"
+    spark.sql.cbo.joinReorder.ga.enabled: "true"
+    spark.sql.files.minPartitionNum: "640"
+    spark.sql.files.maxPartitionBytes: 256MB
+    spark.sql.hive.metastorePartitionPruning: "true"
+    spark.sql.optimizer.runtimeFilter.semiJoinReduction.enabled: "true"
+    spark.sql.optimizer.runtime.bloomFilter.enabled: "true"
+    spark.sql.optimizer.runtime.bloomFilter.creationSideThreshold: 50MB
+    spark.sql.optimizer.runtimeFilter.number.threshold: "10"
+    spark.sql.optimizer.dynamicFilterPruning.enabled: "true"
+    spark.sql.optimizer.dynamicPartitionPruning.enabled: "true"
+    spark.sql.optimizer.dynamicDataPruning.enabled: "true"
+    spark.sql.optimizer.dynamicPartitionPruning.useStats: "true"
+    spark.sql.optimizer.dynamicPartitionPruning.fallbackFilterRatio: "0.5"
+    spark.sql.optimizer.dynamicPartitionPruning.reuseBroadcastOnly: "true"
+    spark.sql.optimizer.dynamicDataPruning.pruningSideThreshold: 10GB
+    spark.sql.parquet.aggregatePushdown: "true"
+    spark.sql.parquet.compression.codec: snappy
+    spark.sql.parquet.filterPushdown: "true"
+    spark.sql.parquet.mergeSchema: "false"
+    spark.sql.rankLimit.enabled: "true"
+    spark.sql.shuffle.partitions: "640"
+  driver:
+    cores: 6
+    memory: 20g
+    memoryOverhead: 4g
+    env:
+    - name: OSS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: oss-secret
+          key: akId
+          optional: false
+    - name: OSS_ACCESS_KEY_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: oss-secret
+          key: akSecret
+          optional: false
+    javaOptions: >
+      -XX:+UseParallelGC
+      -XX:+UseNUMA
+      -XX:+UseLargePages
+      -XX:+AlwaysPreTouch
+      -XX:+DisableExplicitGC
+    volumeMounts:
+    - name: oss-pvc
+      mountPath: /mnt/oss-pvc
+    serviceAccount: spark
+    nodeSelector:
+      spark.tpcds.benchmark/role: spark-master
+    tolerations:
+    - key: spark.tpcds.benchmark/role
+      operator: Equal
+      value: spark-master
+      effect: NoSchedule
+  executor:
+    instances: 60
+    cores: 3
+    coreLimit: "3"
+    memory: 9g
+    memoryOverhead: 3g
+    env:
+    - name: OSS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: oss-secret
+          key: akId
+          optional: false
+    - name: OSS_ACCESS_KEY_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: oss-secret
+          key: akSecret
+          optional: false
+    javaOptions: >
+      -XX:+UseParallelGC
+      -XX:+UseNUMA
+      -XX:+UseLargePages
+      -XX:+AlwaysPreTouch
+      -XX:+DisableExplicitGC
+    volumeMounts:
+    - name: oss-pvc
+      mountPath: /mnt/oss-pvc
+    - name: spark-local-dir-1
+      mountPath: /mnt/disk1
+    - name: spark-local-dir-2
+      mountPath: /mnt/disk2
+    - name: spark-local-dir-3
+      mountPath: /mnt/disk3
+    - name: spark-local-dir-4
+      mountPath: /mnt/disk4
+    - name: spark-local-dir-5
+      mountPath: /mnt/disk5
+    - name: spark-local-dir-6
+      mountPath: /mnt/disk6
+    nodeSelector:
+      spark.tpcds.benchmark/role: spark-worker
+    tolerations:
+    - key: spark.tpcds.benchmark/role
+      operator: Equal
+      value: spark-worker
+      effect: NoSchedule
+    podSecurityContext:
+      fsGroup: 185
   volumes:
+  - name: oss-pvc
+    persistentVolumeClaim:
+      claimName: oss-pvc
   - name: spark-local-dir-1
     hostPath:
       path: /mnt/disk1
@@ -128,34 +214,11 @@ spec:
     hostPath:
       path: /mnt/disk6
       type: Directory
-  driver:
-    cores: 6
-    memory: 20g
-    memoryOverhead: 4g
-    nodeSelector:
-      "benchmark.node.role": "spark-master"
-    serviceAccount: spark
-    javaOptions: "-XX:+UseParallelGC -XX:+UseNUMA -XX:+UseLargePages -XX:+AlwaysPreTouch -XX:+DisableExplicitGC"
-  executor:
-    instances: 60
-    cores: 3
-    memory: 9g
-    memoryOverhead: 3g
-    nodeSelector:
-      "benchmark.node.role": "spark-worker"
-    javaOptions: "-XX:+UseParallelGC -XX:+UseNUMA -XX:+UseLargePages -XX:+AlwaysPreTouch -XX:+DisableExplicitGC"
-    volumeMounts:
-    - name: spark-local-dir-1
-      mountPath: /mnt/disk1
-    - name: spark-local-dir-2
-      mountPath: /mnt/disk2
-    - name: spark-local-dir-3
-      mountPath: /mnt/disk3
-    - name: spark-local-dir-4
-      mountPath: /mnt/disk4
-    - name: spark-local-dir-5
-      mountPath: /mnt/disk5
-    - name: spark-local-dir-6
-      mountPath: /mnt/disk6
+  deps:
+    jars:
+    - local:///mnt/oss-pvc/spark/jars/jindo-core-6.4.0.jar
+    - local:///mnt/oss-pvc/spark/jars/jindo-core-linux-el7-aarch64-6.4.0.jar
+    - local:///mnt/oss-pvc/spark/jars/jindo-core-linux-el6-x86_64-6.4.0.jar
+    - local:///mnt/oss-pvc/spark/jars/jindo-sdk-6.4.0.jar
   restartPolicy:
     type: Never
