@@ -27,5 +27,9 @@ for ((i = 0; i < n; i++)); do
     dir="/mnt/disk$(($i + 1))"
     mkdir -p ${dir}
     echo "$(blkid ${disks[i]}1 | awk '{print $2}' | sed 's/\"//g') ${dir} xfs defaults 0 0" >>/etc/fstab
+    chmod g+w ${dir}
 done
 mount -a
+
+# 修改挂载点访问权限
+chmod g+w /mnt/disk*

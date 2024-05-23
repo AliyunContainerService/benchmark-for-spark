@@ -1,5 +1,5 @@
 resource "alicloud_cs_kubernetes_node_pool" "spark-master" {
-  name                          = "np-spark-master-${var.suffix}"
+  node_pool_name                = "spark-master"
   cluster_id                    = var.cluster_id
   vswitch_ids                   = var.vswitch_ids
   instance_types                = [var.master_instance_type]
@@ -7,17 +7,19 @@ resource "alicloud_cs_kubernetes_node_pool" "spark-master" {
   system_disk_category          = "cloud_essd"
   system_disk_size              = 40
   system_disk_performance_level = "PL1"
+
   labels {
-    key   = "benchmark.node.role"
+    key   = "spark.tpcds.benchmark/role"
     value = "spark-master"
   }
+
   desired_size       = var.master_instance_count
   resource_group_id  = var.resource_group_id
   security_group_ids = [var.security_group_id]
 }
 
 resource "alicloud_cs_kubernetes_node_pool" "spark-worker" {
-  name                          = "np-spark-worker-${var.suffix}"
+  node_pool_name                = "spark-worker"
   cluster_id                    = var.cluster_id
   vswitch_ids                   = var.vswitch_ids
   desired_size                  = var.worker_instance_count
@@ -70,8 +72,14 @@ resource "alicloud_cs_kubernetes_node_pool" "spark-worker" {
   }
 
   labels {
-    key   = "benchmark.node.role"
+    key   = "spark.tpcds.benchmark/role"
     value = "spark-worker"
+  }
+
+  taints {
+    key    = "spark.tpcds.benchmark/role"
+    value  = "spark-worker"
+    effect = "NoSchedule"
   }
 
   kubelet_configuration {

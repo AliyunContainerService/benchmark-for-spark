@@ -1,7 +1,7 @@
 resource "alicloud_cs_managed_kubernetes" "default" {
   name     = "ack-${var.suffix}"
   timezone = "Asia/Shanghai"
-  version  = "1.26.3-aliyun.1"
+  version  = "1.28.9-aliyun.1"
 
   worker_vswitch_ids = var.worker_vswitch_ids
   pod_vswitch_ids    = var.pod_vswitch_ids

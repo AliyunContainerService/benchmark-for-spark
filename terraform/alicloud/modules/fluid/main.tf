@@ -1,5 +1,5 @@
 resource "alicloud_cs_kubernetes_node_pool" "fluid" {
-  name                          = "np-fluid-${var.suffix}"
+  node_pool_name                          = "np-fluid-${var.suffix}"
   cluster_id                    = var.cluster_id
   vswitch_ids                   = var.vswitch_ids
   desired_size                  = var.instance_count

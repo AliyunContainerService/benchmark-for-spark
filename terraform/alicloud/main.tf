@@ -2,11 +2,11 @@ terraform {
   required_providers {
     alicloud = {
       source  = "hashicorp/alicloud"
-      version = "1.213.0"
+      version = "1.223.2"
     }
   }
 
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.8.0"
 }
 
 resource "random_string" "suffix" {

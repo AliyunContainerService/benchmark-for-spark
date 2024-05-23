@@ -16,7 +16,6 @@ config/values.yaml
 .terraform.tfstate.lock.info
 terraform.tfstate
 terraform.tfstate.backup
-terraform.tfvars
 
 # Various IDEs
 .idea/

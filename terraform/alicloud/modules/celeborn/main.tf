@@ -1,5 +1,5 @@
 resource "alicloud_cs_kubernetes_node_pool" "celeborn" {
-  name                          = "np-celeborn-${var.suffix}"
+  node_pool_name                = "celeborn"
   cluster_id                    = var.cluster_id
   vswitch_ids                   = var.vswitch_ids
   desired_size                  = var.instance_count
@@ -10,7 +10,7 @@ resource "alicloud_cs_kubernetes_node_pool" "celeborn" {
   system_disk_performance_level = "PL1"
 
   labels {
-    key   = "benchmark.node.role"
+    key   = "tpcds.benchmark.role"
     value = "celeborn"
   }
 
