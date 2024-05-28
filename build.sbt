@@ -10,10 +10,7 @@ lazy val benchmark = (project in file("."))
     libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
       "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
-      "com.github.scopt" %% "scopt" % "4.1.0",
-      "com.aliyun.dfs" % "aliyun-sdk-dfs" % "1.0.3",
-      "com.aliyun.oss" % "aliyun-sdk-oss" % "3.4.1",
-      "org.jdom" % "jdom" % "1.1"
+      "com.github.scopt" %% "scopt" % "4.1.0"
     ),
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
   )
