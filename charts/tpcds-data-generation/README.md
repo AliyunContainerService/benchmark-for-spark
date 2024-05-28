@@ -8,24 +8,7 @@
 - kubectl
 - Helm
 
-## 搭建基准测试环境
-
-关于如何搭建基准测试环境，请参考[基准测试环境搭建](../../docs/benchmark/setup-env/index.md)。
-
-## 编译基准测试代码
-
-```shell
-# 克隆代码仓库
-git clone https://github.com/AliyunContainerService/benchmark-for-spark.git
-
-# 清除编译缓存
-sbt clean
-
-# 编译
-sbt assembly --mem 2048 -J-XX:ReservedCodeCacheSize=1g
-```
-
-## 构建并上传基准测试容器镜像
+## 构建并上传容器镜像
 
 切换到本基准测试目录下，使用 `docker buildx` 构建容器镜像并上传至指定仓库：
 
@@ -40,6 +23,10 @@ docker buildx build \
     --file=charts/tpcds-benchmark/Dockerfile \
     .
 ```
+
+## 搭建基准测试环境
+
+关于如何搭建基准测试环境，请参考[基准测试环境搭建](../../docs/benchmark/setup-env/index.md)。
 
 ## 配置测试数据集参数
 

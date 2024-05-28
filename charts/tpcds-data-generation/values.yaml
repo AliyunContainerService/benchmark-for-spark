@@ -13,15 +13,9 @@ image:
   pullSecrets: []
   # - name: pull-secret
 
-aliyun:
-  # -- Aliyun accessKeyId
-  accessKeyId: ""
-  # -- Aliyun accessKeySecret
-  accessKeySecret: ""
-
 oss:
   # -- OSS bucket
-  bucket: spark-on-ack-benchmark
+  bucket: example-bucket
   # -- OSS endpoint
   endpoint: oss-cn-beijing-internal.aliyuncs.com
 
