@@ -160,8 +160,6 @@ kubectl delete -f spark-pi.yaml
 
 关于如何在 ACK 集群中运行 Spark 工作负载，请参考[快速开始](docs/quick-start.md)。
 
-## 问题与挑战
-
 ## 性能优化
 
 为了提高在 Kubernetes 运行工作负载时的性能和易用性，并降低成本，阿里云 EMR 和 ACK 团队做了很多优化工作，主要有以下这些：
@@ -197,6 +195,16 @@ TPC-DS 基准测试总包含 99 条压测查询，其中有 4 条查询包含 2 
 
 由于上述原因，本文将采用 TPC-DS 基准测试来评测 Spark 在 ACK 上的性能。
 
+### 如何运行 TPC-DS 基准测试
+
+基准测试采用 terraform 管理基准测试环境，保证测试环境可以被轻松一键复现。同时，相关 Spark 作业已经被制作成 Helm Chart，可以通过 Helm 命令行工具一键配置并提交基准作业。关于如何运行 TPC-DS 基准测试的具体步骤，请参考[运行 TPC-DS 基准测试](docs/benchmark/tpcds-benchmark.md)。
+
+### Spark on ACK TPC-DS 基准测试
+
+为了了解在 Kubernetes 容器环境下运行 Spark 作业的性能，本次基准测试创建了包含 1个 `ecs.g7.2xlarge` 实例和 6 个 `ecs.g7.8xlarge` 实例的 ACK 集群，并运行了 5 轮数据量为 3 TB（SF=3072）的 TPC-DS 基准测试。
+
+关于基准测试的详细步骤和测试结果，请参考 [Spark on ACK TPC-DS 基准测试](docs/benchmark/spark-on-ack/index.md)。
+
 ### Apache Spark v.s. EMR Spark
 
 阿里云 EMR Spark 基于开源的 Apache Spark 做了大量优化，下面将在同一 ACK 集群环境中分别使用 Apache Spark 和 EMR Spark 运行相同的规模的 TPC-DS 基准测试，基准测试的配置和结果请参考 [Apache Spark v.s. EMR Spark](docs/benchmark/apache-spark-vs-emr-spark.md)。
@@ -207,4 +215,4 @@ Spark 作业可以以非容器化的方式直接运行在 ECS 中，也可以以
 
 ### Spark x86 v.s. on arm64
 
-为了对比 Spark on ACK 在 x86/arm64 架构下的性能和成本，下面将在相同数量和相同规模的 x86/arm64 架构集群中分别运行相同规模的 TPC-DS 基准测试，它们具有相同的节点数量、vCPU 数量和内存大小，并挂载了相同数量和规模的云盘，区别主要在于 x86 架构集群使用了 `g7.8xlarge` 实例规格族 ECS，arm64 架构集群使用了 `g8y.8xlarge` 实例规格族 ECS，基准测试的配置和结果请参考[Spark x86 v.s. on arm64](docs/benchmark/spark-on-x86-vs-on-arm64/index.md)
+为了对比 Spark on ACK 在 x86/arm64 架构下的性能和成本，下面将在相同数量和相同规模的 x86/arm64 架构集群中分别运行相同规模的 TPC-DS 基准测试，它们具有相同的节点数量、vCPU 数量和内存大小，并挂载了相同数量和规模的云盘，区别主要在于 x86 架构集群使用了 `g7.8xlarge` 实例规格族 ECS，arm64 架构集群使用了 `g8y.8xlarge` 实例规格族 ECS，基准测试的配置和结果请参考 [Spark x86 v.s. on arm64](docs/benchmark/spark-on-x86-vs-on-arm64/index.md)
