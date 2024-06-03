@@ -6,7 +6,6 @@
 
 - 已经在本地机器安装 [Git](https://git-scm.com/)、[Docker](https://www.docker.com/)、[kubectl](https://kubernetes.io/docs/reference/kubectl/) 和 [Helm 3](https://helm.sh/) 等工具；
 - 已经在本地安装并配置 ossutil，详情请参考[阿里云 OSS 命令行工具 ossutil](https://help.aliyun.com/oss/developer-reference/ossutil-1/)；
-- 已经生成数据量规模为 3 TB（SF=3072）的 TPC-DS 基准测试数据集并上传至 OSS，详情请参见[生成 TPC-DS 测试数据集成](../../docs/benchmark/tpcds-data-generation.md)。
 
 ## 创建基准测试环境
 
@@ -236,16 +235,86 @@ IMAGE_TAG=3.3.2-0.1
 
     输出表明 PVC 已经创建并绑定成功。
 
-## 提交基准测试作业
+## 生成基准测试数据
 
-1. 执行如下命令，设置基准测试作业参数：
+如果尚未生成基准测试数据集，则可以按照如下步骤生成测试数据集：
+
+1. 执行如下命令，设置数据生成作业参数：
 
     ```shell
     # 规模因子
     SCALE_FACTOR=3072
+
+    # 分区数量
+    NUM_PARTITIONS=640
     ```
 
-2. 执行如下命令，提交基准测试作业：
+2. 执行如下命令，提交数据生成作业：
+
+    ```shell
+    helm install tpcds-data-generation-${SCALE_FACTOR}gb charts/tpcds-data-generation \
+        --set image.repository=${IMAGE_REPOSITORY} \
+        --set image.tag=${IMAGE_TAG} \
+        --set oss.bucket=${OSS_BUCKET} \
+        --set oss.endpoint=${OSS_ENDPOINT} \
+        --set benchmark.scaleFactor=${SCALE_FACTOR} \
+        --set benchmark.numPartitions=${NUM_PARTITIONS}
+    ```
+
+3. 执行如下命令，实时查看 Spark 作业状态：
+
+    ```shell
+    kubectl get -w sparkapplication tpcds-data-generation-${SCALE_FACTOR}gb
+    ```
+
+4. 执行如下命令，实时查看 Driver 日志输出：
+
+    ```shell
+    kubectl logs -f tpcds-data-generation-${SCALE_FACTOR}gb-driver
+    ```
+
+5. 当数据生成完成之后，执行如下命令，查看生成的数据集目录结构：
+
+    ```shell
+    ossutil ls -d oss://${OSS_BUCKET}/spark/data/tpcds/${SCALE_FACTOR}gb/
+    ```
+
+    预期输出：
+
+    ```text
+    oss://example-bucket/spark/data/tpcds/3072gb/
+    oss://example-bucket/spark/data/tpcds/3072gb/call_center/
+    oss://example-bucket/spark/data/tpcds/3072gb/catalog_page/
+    oss://example-bucket/spark/data/tpcds/3072gb/catalog_returns/
+    oss://example-bucket/spark/data/tpcds/3072gb/catalog_sales/
+    oss://example-bucket/spark/data/tpcds/3072gb/customer/
+    oss://example-bucket/spark/data/tpcds/3072gb/customer_address/
+    oss://example-bucket/spark/data/tpcds/3072gb/customer_demographics/
+    oss://example-bucket/spark/data/tpcds/3072gb/date_dim/
+    oss://example-bucket/spark/data/tpcds/3072gb/household_demographics/
+    oss://example-bucket/spark/data/tpcds/3072gb/income_band/
+    oss://example-bucket/spark/data/tpcds/3072gb/inventory/
+    oss://example-bucket/spark/data/tpcds/3072gb/item/
+    oss://example-bucket/spark/data/tpcds/3072gb/promotion/
+    oss://example-bucket/spark/data/tpcds/3072gb/reason/
+    oss://example-bucket/spark/data/tpcds/3072gb/ship_mode/
+    oss://example-bucket/spark/data/tpcds/3072gb/store/
+    oss://example-bucket/spark/data/tpcds/3072gb/store_returns/
+    oss://example-bucket/spark/data/tpcds/3072gb/store_sales/
+    oss://example-bucket/spark/data/tpcds/3072gb/time_dim/
+    oss://example-bucket/spark/data/tpcds/3072gb/warehouse/
+    oss://example-bucket/spark/data/tpcds/3072gb/web_page/
+    oss://example-bucket/spark/data/tpcds/3072gb/web_returns/
+    oss://example-bucket/spark/data/tpcds/3072gb/web_sales/
+    oss://example-bucket/spark/data/tpcds/3072gb/web_site/
+    Object and Directory Number is: 25
+
+    0.446278(s) elapsed
+    ```
+
+## 提交基准测试作业
+
+1. 执行如下命令，提交基准测试作业：
 
     ```shell
     helm install tpcds-benchmark-${SCALE_FACTOR}gb charts/tpcds-benchmark \
@@ -259,13 +328,13 @@ IMAGE_TAG=3.3.2-0.1
 
     可以添加更多形如 `--set key=value` 的参数指定基准测试的配置，支持的配置选项请参见 `charts/tpcds-benchmark/values.yaml`。
 
-3. 执行如下命令，实时查看基准测试作业状态：
+2. 执行如下命令，实时查看基准测试作业状态：
 
     ```shell
     kubectl get -w sparkapplication tpcds-benchmark-${SCALE_FACTOR}gb
     ```
 
-4. 执行如下命令，实时查看 Driver Pod 日志输出：
+3. 执行如下命令，实时查看 Driver Pod 日志输出：
 
     ```shell
     kubectl logs -f tpcds-benchmark-${SCALE_FACTOR}gb-driver
@@ -282,13 +351,13 @@ IMAGE_TAG=3.3.2-0.1
     期望输出如下：
 
     ```shell
-    oss://spark-on-ack/spark/result/tpcds/3072gb/
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/_SUCCESS
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/part-00000-80c681de-ae8d-4449-b647-5e3d373edef1-c000.json
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/_SUCCESS
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv
+    oss://example-bucket/spark/result/tpcds/3072gb/
+    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/
+    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/_SUCCESS
+    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/part-00000-80c681de-ae8d-4449-b647-5e3d373edef1-c000.json
+    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/
+    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/_SUCCESS
+    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv
     Object Number is: 7
 
     0.172532(s) elapsed
@@ -297,7 +366,7 @@ IMAGE_TAG=3.3.2-0.1
 2. 执行如下命令，从 OSS 下载基准测试结果至本地并保存为 `result.csv`：
 
     ```shell
-    ossutil cp oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv result.csv
+    ossutil cp oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv result.csv
     ```
 
 3. 执行如下命令，查看基准测试结果：
@@ -333,28 +402,34 @@ IMAGE_TAG=3.3.2-0.1
 1. 执行如下命令，删除基准测试作业：
 
     ```shell
-    helm uninstall tpcds-benchmark
+    helm uninstall tpcds-benchmark-${SCALE_FACTOR}gb
     ```
 
-2. 执行如下命令，删除 PVC 资源：
+2. 执行如下命令，删除数据生成作业：
+
+    ```shell
+    helm uninstall tpcds-data-generation-${SCALE_FACTOR}gb
+    ```
+
+3. 执行如下命令，删除 PVC 资源：
 
     ```shell
     kubectl delete -f oss-pvc.yaml
     ```
 
-3. 执行如下命令，删除 PV 资源：
+4. 执行如下命令，删除 PV 资源：
 
     ```shell
     kubectl delete -f oss-pv.yaml
     ```
 
-4. 执行如下命令，删除 Secret 资源：
+5. 执行如下命令，删除 Secret 资源：
 
     ```shell
     kubectl delete -f oss-secret.yaml
     ```
 
-5. 如果不再需要本示例中创建的存储桶，执行如下命令，删除 OSS 存储桶：
+6. 如果不再需要本示例中创建的存储桶，执行如下命令，删除 OSS 存储桶：
 
     ```shell
     ossutil rm oss://${OSS_BUCKET} -b
@@ -364,7 +439,7 @@ IMAGE_TAG=3.3.2-0.1
 
     - 删除 OSS 存储桶为不可逆操作，请谨慎操作，以免数据丢失。
 
-6. 销毁基准测试集群环境：
+7. 销毁基准测试集群环境：
 
     ```shell
     terraform -chdir=terraform/alicloud destroy
