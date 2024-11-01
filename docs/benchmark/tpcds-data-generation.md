@@ -5,8 +5,9 @@
 ## 前提条件
 
 - 已经创建 ACK 集群；
-- 已经在 ACK 集群中部署 ack-spark-operator3.0 组件，详情请参见[部署 ack-spark-operator3.0](setup-env/index.md#部署-ack-spark-operator30)；
-- 已经在本地机器安装 ossutil 工具，详情请参见[安装 ossutil](https://help.aliyun.com/zh/oss/developer-reference/install-ossutil);
+- 已部署 ack-spark-operator 组件，详情请参见[部署 ack-spark-operator 组件](https://help.aliyun.com/ack/ack-managed-and-ack-dedicated/use-cases/use-spark-operator-to-run-spark-jobs-on-ack#Ba67u)；
+- 已通过 kubectl 工具连接集群，详情请参见[获取集群 KubeConfig 并通过 kubectl 工具连接集群](https://help.aliyun.com/ack/ack-managed-and-ack-dedicated/user-guide/obtain-the-kubeconfig-file-of-a-cluster-and-use-kubectl-to-connect-to-the-cluster#task-ubf-lhg-vdb)；
+- 已经在本地机器安装 ossutil 工具，详情请参见[安装 ossutil](https://help.aliyun.com/zh/oss/developer-reference/install-ossutil)；
 - 已经在本地机器安装 [Git](https://git-scm.com/)、[Docker](https://www.docker.com/)、[kubectl](https://kubernetes.io/docs/reference/kubectl/) 和 [Helm 3](https://helm.sh/) 等工具。
 
 ## 步骤一：准备基准测试容器镜像
@@ -14,15 +15,17 @@
 执行如下命令，构建基准测试容器镜像并推送至镜像仓库：
 
 ```shell
-IMAGE_REPOSITORY=registry.cn-beijing.aliyuncs.com/poc/spark-tpcds-benchmark
-IMAGE_TAG=3.3.2-0.1
+IMAGE_REGISTRY=registry-cn-beijing.ack.aliyuncs.com
+IMAGE_REPOSITORY=acs/spark-tpcds-benchmark
+IMAGE_TAG=3.5.3-0.1
+IMAGE=${IMAGE_REGISTRY}/${IMAGE_REPOSITORY}:${IMAGE_TAG}
+PLATFORMS=linux/amd64,linux/arm64
 
 docker buildx build \
     --output=type=registry \
     --push \
-    --platform=linux/amd64,linux/arm64 \
-    --tag=${IMAGE_REPOSITORY}:${IMAGE_TAG} \
-    --build-arg=SPARK_IMAGE=apache/spark:v3.3.2 \
+    --platform=${PLATFORMS} \
+    --tag=${IMAGE} \
     .
 ```
 

@@ -1,0 +1,16 @@
+.bsp/
+.git/
+.metals/
+.vscode/
+benchmarks/
+charts/
+docs/
+kubernetes/
+target/
+terraform/
+.dockerignore
+.gitignore
+.scalafmt.conf
+Dockerfile
+LICENSE
+README.md
