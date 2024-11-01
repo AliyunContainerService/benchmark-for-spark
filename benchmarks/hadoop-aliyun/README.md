@@ -280,13 +280,13 @@ IMAGE_TAG=3.3.2-0.1
     期望输出如下：
 
     ```text
-    oss://spark-on-ack/spark/result/tpcds/3072gb/
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1717172938925/
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1717172938925/_SUCCESS
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1717172938925/part-00000-09313ded-8fe6-4f72-bdd2-63d0e8117570-c000.json
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1717172938925/summary.csv/
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1717172938925/summary.csv/_SUCCESS
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1717172938925/summary.csv/part-00000-0db08f60-14e6-4866-a82a-fb8b5863d739-c000.csv
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1717172938925/
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1717172938925/_SUCCESS
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1717172938925/part-00000-09313ded-8fe6-4f72-bdd2-63d0e8117570-c000.json
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1717172938925/summary.csv/
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1717172938925/summary.csv/_SUCCESS
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1717172938925/summary.csv/part-00000-0db08f60-14e6-4866-a82a-fb8b5863d739-c000.csv
     Object Number is: 7
 
     0.172532(s) elapsed
@@ -295,7 +295,7 @@ IMAGE_TAG=3.3.2-0.1
 2. 执行如下命令，从 OSS 下载基准测试结果至本地并保存为 `result.csv`：
 
     ```shell
-    ossutil cp oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1717172938925/summary.csv/part-00000-0db08f60-14e6-4866-a82a-fb8b5863d739-c000.csv result.csv
+    ossutil cp oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1717172938925/summary.csv/part-00000-0db08f60-14e6-4866-a82a-fb8b5863d739-c000.csv result.csv
     ```
 
 3. 执行如下命令，查看基准测试结果：

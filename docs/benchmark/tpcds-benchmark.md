@@ -82,17 +82,18 @@
 执行如下命令，构建基准测试容器镜像并推送至镜像仓库：
 
 ```shell
-# 镜像仓库
-IMAGE_REPOSITORY=registry.cn-beijing.aliyuncs.com/poc/spark-tpcds-benchmark
+IMAGE_REGISTRY=registry-cn-beijing.ack.aliyuncs.com      # 请替换成你的镜像仓库地址
+IMAGE_REPOSITORY=ack-demo/spark-tpcds-benchmark          # 请替换成你的镜像仓库名称
+IMAGE_TAG=3.3.2-0.1                                      # 镜像标签
+IMAGE=${IMAGE_REGISTRY}/${IMAGE_REPOSITORY}:${IMAGE_TAG} # 完整的镜像地址
+PLATFORMS=linux/amd64,linux/arm64                        # 镜像架构
 
-# 镜像标签
-IMAGE_TAG=3.3.2-0.1
-
+# 构建镜像并推送至你的镜像仓库中
 docker buildx build \
     --output=type=registry \
     --push \
-    --platform=linux/amd64,linux/arm64 \
-    --tag=${IMAGE_REPOSITORY}:${IMAGE_TAG} \
+    --platform=${PLATFORMS} \
+    --tag=${IMAGE} \
     --build-arg=SPARK_IMAGE=apache/spark:v3.3.2 \
     .
 ```
@@ -252,6 +253,7 @@ docker buildx build \
 
     ```shell
     helm install tpcds-benchmark charts/tpcds-benchmark \
+        --set image.registry=${IMAGE_REGISTRY} \
         --set image.repository=${IMAGE_REPOSITORY} \
         --set image.tag=${IMAGE_TAG} \
         --set oss.bucket=${OSS_BUCKET} \
@@ -285,13 +287,13 @@ docker buildx build \
     期望输出如下：
 
     ```shell
-    oss://spark-on-ack/spark/result/tpcds/3072gb/
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/_SUCCESS
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/part-00000-80c681de-ae8d-4449-b647-5e3d373edef1-c000.json
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/_SUCCESS
-    oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1716901969870/
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1716901969870/_SUCCESS
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1716901969870/part-00000-80c681de-ae8d-4449-b647-5e3d373edef1-c000.json
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1716901969870/summary.csv/
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1716901969870/summary.csv/_SUCCESS
+    oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv
     Object Number is: 7
 
     0.172532(s) elapsed
@@ -300,7 +302,7 @@ docker buildx build \
 2. 执行如下命令，从 OSS 下载基准测试结果至本地并保存为 `result.csv`：
 
     ```shell
-    ossutil cp oss://spark-on-ack/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv result.csv
+    ossutil cp oss://spark-on-ack/spark/result/tpcds/SF=3072/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv result.csv
     ```
 
 3. 执行如下命令，查看基准测试结果：

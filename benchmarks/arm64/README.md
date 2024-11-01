@@ -273,31 +273,31 @@ IMAGE_TAG=3.3.2-0.1
     预期输出：
 
     ```text
-    oss://example-bucket/spark/data/tpcds/3072gb/
-    oss://example-bucket/spark/data/tpcds/3072gb/call_center/
-    oss://example-bucket/spark/data/tpcds/3072gb/catalog_page/
-    oss://example-bucket/spark/data/tpcds/3072gb/catalog_returns/
-    oss://example-bucket/spark/data/tpcds/3072gb/catalog_sales/
-    oss://example-bucket/spark/data/tpcds/3072gb/customer/
-    oss://example-bucket/spark/data/tpcds/3072gb/customer_address/
-    oss://example-bucket/spark/data/tpcds/3072gb/customer_demographics/
-    oss://example-bucket/spark/data/tpcds/3072gb/date_dim/
-    oss://example-bucket/spark/data/tpcds/3072gb/household_demographics/
-    oss://example-bucket/spark/data/tpcds/3072gb/income_band/
-    oss://example-bucket/spark/data/tpcds/3072gb/inventory/
-    oss://example-bucket/spark/data/tpcds/3072gb/item/
-    oss://example-bucket/spark/data/tpcds/3072gb/promotion/
-    oss://example-bucket/spark/data/tpcds/3072gb/reason/
-    oss://example-bucket/spark/data/tpcds/3072gb/ship_mode/
-    oss://example-bucket/spark/data/tpcds/3072gb/store/
-    oss://example-bucket/spark/data/tpcds/3072gb/store_returns/
-    oss://example-bucket/spark/data/tpcds/3072gb/store_sales/
-    oss://example-bucket/spark/data/tpcds/3072gb/time_dim/
-    oss://example-bucket/spark/data/tpcds/3072gb/warehouse/
-    oss://example-bucket/spark/data/tpcds/3072gb/web_page/
-    oss://example-bucket/spark/data/tpcds/3072gb/web_returns/
-    oss://example-bucket/spark/data/tpcds/3072gb/web_sales/
-    oss://example-bucket/spark/data/tpcds/3072gb/web_site/
+    oss://example-bucket/spark/data/tpcds/SF=3072/
+    oss://example-bucket/spark/data/tpcds/SF=3072/call_center/
+    oss://example-bucket/spark/data/tpcds/SF=3072/catalog_page/
+    oss://example-bucket/spark/data/tpcds/SF=3072/catalog_returns/
+    oss://example-bucket/spark/data/tpcds/SF=3072/catalog_sales/
+    oss://example-bucket/spark/data/tpcds/SF=3072/customer/
+    oss://example-bucket/spark/data/tpcds/SF=3072/customer_address/
+    oss://example-bucket/spark/data/tpcds/SF=3072/customer_demographics/
+    oss://example-bucket/spark/data/tpcds/SF=3072/date_dim/
+    oss://example-bucket/spark/data/tpcds/SF=3072/household_demographics/
+    oss://example-bucket/spark/data/tpcds/SF=3072/income_band/
+    oss://example-bucket/spark/data/tpcds/SF=3072/inventory/
+    oss://example-bucket/spark/data/tpcds/SF=3072/item/
+    oss://example-bucket/spark/data/tpcds/SF=3072/promotion/
+    oss://example-bucket/spark/data/tpcds/SF=3072/reason/
+    oss://example-bucket/spark/data/tpcds/SF=3072/ship_mode/
+    oss://example-bucket/spark/data/tpcds/SF=3072/store/
+    oss://example-bucket/spark/data/tpcds/SF=3072/store_returns/
+    oss://example-bucket/spark/data/tpcds/SF=3072/store_sales/
+    oss://example-bucket/spark/data/tpcds/SF=3072/time_dim/
+    oss://example-bucket/spark/data/tpcds/SF=3072/warehouse/
+    oss://example-bucket/spark/data/tpcds/SF=3072/web_page/
+    oss://example-bucket/spark/data/tpcds/SF=3072/web_returns/
+    oss://example-bucket/spark/data/tpcds/SF=3072/web_sales/
+    oss://example-bucket/spark/data/tpcds/SF=3072/web_site/
     Object and Directory Number is: 25
 
     0.446278(s) elapsed
@@ -351,13 +351,13 @@ IMAGE_TAG=3.3.2-0.1
     期望输出如下：
 
     ```shell
-    oss://example-bucket/spark/result/tpcds/3072gb/
-    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/
-    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/_SUCCESS
-    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/part-00000-80c681de-ae8d-4449-b647-5e3d373edef1-c000.json
-    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/
-    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/_SUCCESS
-    oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv
+    oss://example-bucket/spark/result/tpcds/SF=3072/
+    oss://example-bucket/spark/result/tpcds/SF=3072/timestamp=1716901969870/
+    oss://example-bucket/spark/result/tpcds/SF=3072/timestamp=1716901969870/_SUCCESS
+    oss://example-bucket/spark/result/tpcds/SF=3072/timestamp=1716901969870/part-00000-80c681de-ae8d-4449-b647-5e3d373edef1-c000.json
+    oss://example-bucket/spark/result/tpcds/SF=3072/timestamp=1716901969870/summary.csv/
+    oss://example-bucket/spark/result/tpcds/SF=3072/timestamp=1716901969870/summary.csv/_SUCCESS
+    oss://example-bucket/spark/result/tpcds/SF=3072/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv
     Object Number is: 7
 
     0.172532(s) elapsed
@@ -366,7 +366,7 @@ IMAGE_TAG=3.3.2-0.1
 2. 执行如下命令，从 OSS 下载基准测试结果至本地并保存为 `result.csv`：
 
     ```shell
-    ossutil cp oss://example-bucket/spark/result/tpcds/3072gb/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv result.csv
+    ossutil cp oss://example-bucket/spark/result/tpcds/SF=3072/timestamp=1716901969870/summary.csv/part-00000-5a5d1e4a-3fe0-43a1-8248-3259af4f10a7-c000.csv result.csv
     ```
 
 3. 执行如下命令，查看基准测试结果：

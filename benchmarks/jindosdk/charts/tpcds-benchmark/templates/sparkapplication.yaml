@@ -128,7 +128,7 @@ spec:
       -XX:+DisableExplicitGC
     volumeMounts:
     - name: oss-pvc
-      mountPath: /mnt/oss-pvc
+      mountPath: /mnt/oss
     serviceAccount: spark
     nodeSelector:
       spark.tpcds.benchmark/role: spark-master
@@ -164,7 +164,7 @@ spec:
       -XX:+DisableExplicitGC
     volumeMounts:
     - name: oss-pvc
-      mountPath: /mnt/oss-pvc
+      mountPath: /mnt/oss
     - name: spark-local-dir-1
       mountPath: /mnt/disk1
     - name: spark-local-dir-2
@@ -216,9 +216,9 @@ spec:
       type: Directory
   deps:
     jars:
-    - local:///mnt/oss-pvc/spark/jars/jindo-core-6.4.0.jar
-    - local:///mnt/oss-pvc/spark/jars/jindo-core-linux-el7-aarch64-6.4.0.jar
-    - local:///mnt/oss-pvc/spark/jars/jindo-core-linux-el6-x86_64-6.4.0.jar
-    - local:///mnt/oss-pvc/spark/jars/jindo-sdk-6.4.0.jar
+    - local:///mnt/oss/spark/jars/jindo-core-6.4.0.jar
+    - local:///mnt/oss/spark/jars/jindo-core-linux-el7-aarch64-6.4.0.jar
+    - local:///mnt/oss/spark/jars/jindo-core-linux-el6-x86_64-6.4.0.jar
+    - local:///mnt/oss/spark/jars/jindo-sdk-6.4.0.jar
   restartPolicy:
     type: Never
