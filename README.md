@@ -158,7 +158,7 @@ kubectl delete -f spark-pi.yaml
 
 ## 快速开始
 
-关于如何在 ACK 集群中运行 Spark 工作负载，请参考[快速开始](docs/quick-start.md)。
+关于如何在 ACK 集群中运行 Spark 工作负载，请参考[使用Spark Operator运行Spark作业](https://help.aliyun.com/ack/ack-managed-and-ack-dedicated/use-cases/use-spark-operator-to-run-spark-jobs-on-ack)。
 
 ## 性能优化
 
