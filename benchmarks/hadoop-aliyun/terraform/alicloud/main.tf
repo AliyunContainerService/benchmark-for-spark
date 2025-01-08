@@ -62,7 +62,7 @@ resource "alicloud_security_group_rule" "icmp" {
 resource "alicloud_cs_managed_kubernetes" "default" {
   name     = "ack-${random_string.suffix.result}"
   timezone = "Asia/Shanghai"
-  version  = "1.28.9-aliyun.1"
+  version  = "1.28.15-aliyun.1"
 
   worker_vswitch_ids = [alicloud_vswitch.default.id]
   pod_vswitch_ids    = [alicloud_vswitch.default.id]
