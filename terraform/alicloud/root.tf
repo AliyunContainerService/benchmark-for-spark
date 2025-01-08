@@ -49,32 +49,28 @@ module "spark" {
   security_group_id     = module.ecs.security_group_id
 }
 
-# Create node pool for fluid
-# module "fluid" {
-#   source            = "./modules/fluid"
-#   suffix            = random_string.suffix.id
-#   cluster_id        = module.cs.cluster_id
-#   vswitch_ids       = [module.vpc.vswitch_id]
-#   instance_count    = var.fluid_instance_count
-#   instance_type     = var.fluid_instance_type
-#   resource_group_id = module.resource_manager.resource_group_id
-#   security_group_id = module.ecs.security_group_id
-# }
-
 # Create node pool for celeborn
-# module "celeborn" {
-#   source            = "./modules/celeborn"
-#   suffix            = random_string.suffix.id
-#   cluster_id        = module.cs.cluster_id
-#   vswitch_ids       = [module.vpc.vswitch_id]
-#   instance_count    = var.celeborn_instance_count
-#   instance_type     = var.celeborn_instance_type
-#   resource_group_id = module.resource_manager.resource_group_id
-#   security_group_id = module.ecs.security_group_id
-# }
+module "celeborn" {
+  source                = "./modules/celeborn"
+  suffix                = random_string.suffix.id
+  cluster_id            = module.cs.cluster_id
+  vswitch_ids           = [module.vpc.vswitch_id]
+  master_instance_count = var.celeborn_master_instance_count
+  master_instance_type  = var.celeborn_master_instance_type
+  worker_instance_count = var.celeborn_worker_instance_count
+  worker_instance_type  = var.celeborn_worker_instance_type
+  resource_group_id     = module.resource_manager.resource_group_id
+  security_group_id     = module.ecs.security_group_id
+}
 
-# Install ack-virtual-node addon
-# module "eci" {
-#   source     = "./modules/eci"
-#   cluster_id = module.cs.cluster_id
-# }
+# Create node pool for fluid
+module "fluid" {
+  source            = "./modules/fluid"
+  suffix            = random_string.suffix.id
+  cluster_id        = module.cs.cluster_id
+  vswitch_ids       = [module.vpc.vswitch_id]
+  instance_count    = var.fluid_instance_count
+  instance_type     = var.fluid_instance_type
+  resource_group_id = module.resource_manager.resource_group_id
+  security_group_id = module.ecs.security_group_id
+}
