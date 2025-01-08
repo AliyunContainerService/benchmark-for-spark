@@ -57,31 +57,24 @@
 
     命令执行过程中需要手动输入 `yes` 进行确认。
 
-## 部署 Spark Operator 组件
+## 部署 Spark Operator
 
-1. 如果未添加过阿里云 Helm 仓库，执行如下命令添加：
+1. 如果尙未添加阿里云容器服务 Helm chart 仓库，执行如下命令进行添加：
 
     ```shell
-    helm repo add aliyunhub https://aliacs-app-catalog.oss-cn-hangzhou.aliyuncs.com/charts-incubator/
+    helm repo add --force-update aliyunhub https://aliacs-app-catalog.oss-cn-hangzhou.aliyuncs.com/charts-incubator
     ```
 
-2. 执行如下命令，更新 Helm 仓库索引：
+2. 执行如下命令，部署阿里云 `ack-spark-operator` 组件：
 
     ```shell
-    helm repo update
-    ```
-
-3. 执行如下命令，部署 Spark Operator 组件：
-
-    ```shell
-    helm install ack-spark-operator3.0 aliyunhub/ack-spark-operator3.0 \
-        --version 1.1.30 \
-        --namespace spark-operator \
+    helm install spark-operator aliyunhub/ack-spark-operator \
+        --version 2.1.0 \
+        --namespace spark \
         --create-namespace \
-        --set image.repository=registry-cn-beijing.ack.aliyuncs.com/acs/spark-operator \
-        --set webhook.enable=true \
-        --set serviceAccounts.spark.name=spark \
-        --set sparkJobNamespace=default
+        --set image.registry=registry-cn-beijing-vpc.ack.aliyuncs.com \
+        --set 'spark.jobNamespaces={default}' \
+        --set spark.serviceAccount.name=spark
     ```
 
 ## 准备基准测试容器镜像

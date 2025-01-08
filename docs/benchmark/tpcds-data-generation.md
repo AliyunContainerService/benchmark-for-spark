@@ -5,7 +5,7 @@
 ## 前提条件
 
 - 已经创建 ACK 集群；
-- 已经在 ACK 集群中部署 ack-spark-operator3.0 组件，详情请参见[部署 ack-spark-operator3.0](setup-env/index.md#部署-ack-spark-operator30)；
+- 已经在 ACK 集群中部署 ack-spark-operator 组件，详情请参见[部署 ack-spark-operator](setup-env/index.md#部署-ack-spark-operator)；
 - 已经在本地机器安装 ossutil 工具，详情请参见[安装 ossutil](https://help.aliyun.com/zh/oss/developer-reference/install-ossutil);
 - 已经在本地机器安装 [Git](https://git-scm.com/)、[Docker](https://www.docker.com/)、[kubectl](https://kubernetes.io/docs/reference/kubectl/) 和 [Helm 3](https://helm.sh/) 等工具。
 
