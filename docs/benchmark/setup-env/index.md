@@ -280,24 +280,25 @@ terraform init
 terraform apply
 ```
 
-## 部署 ack-spark-operator3.0
+## 部署 ack-spark-operator
 
-执行如下命令通过 Helm 部署 `ack-spark-operator3.0`：
+1. 如果尙未添加阿里云容器服务 Helm chart 仓库，执行如下命令进行添加：
 
-```shell
-helm repo add aliyunhub https://aliacs-app-catalog.oss-cn-hangzhou.aliyuncs.com/charts-incubator/
+    ```shell
+    helm repo add --force-update aliyunhub https://aliacs-app-catalog.oss-cn-hangzhou.aliyuncs.com/charts-incubator
+    ```
 
-helm repo update
+2. 执行如下命令，部署阿里云 `ack-spark-operator` 组件：
 
-helm install ack-spark-operator3.0 aliyunhub/ack-spark-operator3.0 \
-    --namespace spark-operator \
-    --create-namespace \
-    --version 1.1.30 \
-    --set image.repository=registry-cn-beijing.ack.aliyuncs.com/acs/spark-operator \
-    --set webhook.enable=true \
-    --set serviceAccounts.spark.name=spark \
-    --set sparkJobNamespace=default
-```
+    ```shell
+    helm install spark-operator aliyunhub/ack-spark-operator \
+        --version 2.1.0 \
+        --namespace spark \
+        --create-namespace \
+        --set image.registry=registry-cn-beijing-vpc.ack.aliyuncs.com \
+        --set 'spark.jobNamespaces={default}' \
+        --set spark.serviceAccount.name=spark
+    ```
 
 ## 安装 ack-spark-history-server（可选）
 
