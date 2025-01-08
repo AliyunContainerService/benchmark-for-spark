@@ -31,4 +31,4 @@ done
 mount -a
 
 # 修改挂载点访问权限
-chmod g+w /mnt/disk*
+chmod a+w /mnt/disk*
