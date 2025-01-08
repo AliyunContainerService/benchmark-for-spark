@@ -21,9 +21,17 @@ spec:
   mainApplicationFile: local:///opt/spark/jars/spark-tpcds-benchmark-assembly-0.1.jar
   arguments:
   - --data
+  {{- if or (eq .Values.sdk "hadoop-aliyun") (eq .Values.sdk "jindoSDK") }}
   - oss://{{ .Values.oss.bucket }}/spark/data/tpcds/SF={{ .Values.benchmark.scaleFactor }}
+  {{- else if eq .Values.sdk "hadoop-aws" }}
+  - s3://{{ .Values.oss.bucket }}/spark/data/tpcds/SF={{ .Values.benchmark.scaleFactor }}
+  {{- end }}
   - --result
+  {{- if or (eq .Values.sdk "hadoop-aliyun") (eq .Values.sdk "jindoSDK") }}
   - oss://{{ .Values.oss.bucket }}/spark/result/tpcds/SF={{ .Values.benchmark.scaleFactor }}
+  {{- else if eq .Values.sdk "hadoop-aws" }}
+  - s3://{{ .Values.oss.bucket }}/spark/result/tpcds/SF={{ .Values.benchmark.scaleFactor }}
+  {{- end }}
   - --dsdgen
   - /opt/tpcds-kit/tools
   - --format
@@ -39,10 +47,28 @@ spec:
   - {{ .Values.benchmark.queries | join "," | quote }}
   - --only-warn
   hadoopConf:
+    {{- if eq .Values.sdk "hadoop-aliyun" }}
+    fs.AbstractFileSystem.oss.impl: org.apache.hadoop.fs.aliyun.oss.OSS
+    fs.oss.impl: org.apache.hadoop.fs.aliyun.oss.AliyunOSSFileSystem
+    fs.oss.credentials.provider: com.aliyun.oss.common.auth.EnvironmentVariableCredentialsProvider
+    fs.oss.endpoint: {{ .Values.oss.endpoint }}
+    {{- else if eq .Values.sdk "hadoop-aws" }}
+    fs.s3.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+    fs.s3.endpoint: {{ .Values.oss.endpoint }}
+    fs.s3.endpoint.region: {{ .Values.oss.region }}
+    fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+    fs.s3a.endpoint: {{ .Values.oss.endpoint }}
+    fs.s3a.endpoint.region: {{ .Values.oss.region }}
+    fs.s3n.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+    fs.s3n.endpoint: {{ .Values.oss.endpoint }}
+    fs.s3n.endpoint.region: {{ .Values.oss.region }}
+    {{- else if eq .Values.sdk "jindoSDK" }}
     fs.AbstractFileSystem.oss.impl: com.aliyun.jindodata.oss.JindoOSS
     fs.oss.impl: com.aliyun.jindodata.oss.JindoOssFileSystem
-    fs.oss.endpoint: {{ .Values.oss.endpoint }}
     fs.oss.credentials.provider: com.aliyun.jindodata.oss.auth.EnvironmentVariableCredentialsProvider
+    fs.oss.endpoint: {{ .Values.oss.endpoint }}
+    {{- end }}
+    fs.oss.endpoint: {{ .Values.oss.endpoint }}
     fs.oss.paging.maximum: "1000"
     fs.oss.multipart.download.threads: "64"
     fs.oss.max.total.tasks: "640"
@@ -52,7 +78,11 @@ spec:
     # Application properties
     spark.local.dir: /mnt/disk1,/mnt/disk2,/mnt/disk3,/mnt/disk4,/mnt/disk5,/mnt/disk6
     spark.eventLog.enabled: "true"
+    {{- if or (eq .Values.sdk "hadoop-aliyun") (eq .Values.sdk "jindoSDK") }}
     spark.eventLog.dir: oss://{{ .Values.oss.bucket }}/spark/event-logs
+    {{- else if eq .Values.sdk "hadoop-aws" }}
+    spark.eventLog.dir: s3://{{ .Values.oss.bucket }}/spark/event-logs
+    {{- end }}
     # Execution Behavior
     spark.default.parallelism: "640"
     spark.driver.maxResultSize: 10g
@@ -129,7 +159,7 @@ spec:
       -XX:+DisableExplicitGC
     volumeMounts:
     - name: oss-pvc
-      mountPath: /mnt/oss-pvc
+      mountPath: /mnt/oss
     serviceAccount: spark
     nodeSelector:
       spark.tpcds.benchmark/role: spark-master
@@ -217,9 +247,20 @@ spec:
       type: Directory
   deps:
     jars:
+    {{- if eq .Values.sdk "hadoop-aliyun" }}
+    - local:///mnt/oss/spark/jars/hadoop-aliyun-3.3.2.jar
+    - local:///mnt/oss/spark/jars/aliyun-sdk-oss-3.17.4.jar
+    - local:///mnt/oss/spark/jars/jdom2-2.0.6.1.jar
+    {{- else if eq .Values.sdk "hadoop-aws" }}
+    - local:///mnt/oss/spark/jars/hadoop-aws-3.3.4.jar
+    - local:///mnt/oss/spark/jars/aws-java-sdk-bundle-1.12.367.jar
+    {{- else if eq .Values.sdk "jindoSDK" }}
     - local:///mnt/oss/spark/jars/jindo-core-6.4.0.jar
     - local:///mnt/oss/spark/jars/jindo-core-linux-el7-aarch64-6.4.0.jar
     - local:///mnt/oss/spark/jars/jindo-core-linux-el6-x86_64-6.4.0.jar
     - local:///mnt/oss/spark/jars/jindo-sdk-6.4.0.jar
+    {{- else }}
+    {{- fail "Unsupported SDK" }}
+    {{- end }}
   restartPolicy:
     type: Never

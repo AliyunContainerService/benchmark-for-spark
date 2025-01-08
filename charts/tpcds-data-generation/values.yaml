@@ -18,6 +18,8 @@ image:
 oss:
   # -- OSS bucket
   bucket: example-bucket
+  # -- OSS region
+  region: cn-beijing
   # -- OSS endpoint
   endpoint: oss-cn-beijing-internal.aliyuncs.com
 
@@ -26,3 +28,10 @@ benchmark:
   scaleFactor: 3072
   # -- Number of partitions
   numPartitions: 640
+
+# -- Specifies which SDK to use when accessing OSS.
+# Available options are:
+#   1. hadoop-aliyun (Ref: https://apache.github.io/hadoop/hadoop-aliyun/tools/hadoop-aliyun/index.html)
+#   2. hadoop-aws (Ref: https://apache.github.io/hadoop/hadoop-aws/tools/hadoop-aws/index.html)
+#   3. jindoSDK (Ref: https://github.com/aliyun/alibabacloud-jindodata)
+sdk: hadoop-aliyun
