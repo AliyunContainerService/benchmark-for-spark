@@ -2,12 +2,13 @@ apiVersion: sparkoperator.k8s.io/v1beta2
 kind: SparkApplication
 metadata:
   name: {{ include "tpcds-benchmark.fullname" . }}-{{ .Values.benchmark.scaleFactor }}gb
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "tpcds-benchmark.labels" . | nindent 4 }}
 spec:
   type: Scala
   mode: cluster
-  image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+  image: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
   {{- with .Values.image.pullPolicy }}
   imagePullPolicy: {{ . }}
   {{- end }}
@@ -15,14 +16,14 @@ spec:
   imagePullSecrets: 
   {{- . | toYaml | nindent 2 }}
   {{- end }}
-  sparkVersion: 3.3.2
+  sparkVersion: 3.5.3
   mainClass: com.aliyun.ack.spark.tpcds.Benchmark
   mainApplicationFile: local:///opt/spark/jars/spark-tpcds-benchmark-assembly-0.1.jar
   arguments:
   - --data
-  - oss://{{ .Values.oss.bucket }}/spark/data/tpcds/{{ .Values.benchmark.scaleFactor }}gb
+  - oss://{{ .Values.oss.bucket }}/spark/data/tpcds/SF={{ .Values.benchmark.scaleFactor }}
   - --result
-  - oss://{{ .Values.oss.bucket }}/spark/result/tpcds/{{ .Values.benchmark.scaleFactor }}gb
+  - oss://{{ .Values.oss.bucket }}/spark/result/tpcds/SF={{ .Values.benchmark.scaleFactor }}
   - --dsdgen
   - /opt/tpcds-kit/tools
   - --format
@@ -51,7 +52,7 @@ spec:
     # Application properties
     spark.local.dir: /mnt/disk1,/mnt/disk2,/mnt/disk3,/mnt/disk4,/mnt/disk5,/mnt/disk6
     spark.eventLog.enabled: "true"
-    spark.eventLog.dir: oss://{{ .Values.oss.bucket }}/spark/spark-events
+    spark.eventLog.dir: oss://{{ .Values.oss.bucket }}/spark/event-logs
     # Execution Behavior
     spark.default.parallelism: "640"
     spark.driver.maxResultSize: 10g
@@ -164,7 +165,7 @@ spec:
       -XX:+DisableExplicitGC
     volumeMounts:
     - name: oss-pvc
-      mountPath: /mnt/oss-pvc
+      mountPath: /mnt/oss
     - name: spark-local-dir-1
       mountPath: /mnt/disk1
     - name: spark-local-dir-2
@@ -216,9 +217,9 @@ spec:
       type: Directory
   deps:
     jars:
-    - local:///mnt/oss-pvc/spark/jars/jindo-core-6.4.0.jar
-    - local:///mnt/oss-pvc/spark/jars/jindo-core-linux-el7-aarch64-6.4.0.jar
-    - local:///mnt/oss-pvc/spark/jars/jindo-core-linux-el6-x86_64-6.4.0.jar
-    - local:///mnt/oss-pvc/spark/jars/jindo-sdk-6.4.0.jar
+    - local:///mnt/oss/spark/jars/jindo-core-6.4.0.jar
+    - local:///mnt/oss/spark/jars/jindo-core-linux-el7-aarch64-6.4.0.jar
+    - local:///mnt/oss/spark/jars/jindo-core-linux-el6-x86_64-6.4.0.jar
+    - local:///mnt/oss/spark/jars/jindo-sdk-6.4.0.jar
   restartPolicy:
     type: Never

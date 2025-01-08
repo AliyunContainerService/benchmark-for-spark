@@ -3,10 +3,12 @@
 # Declare variables to be passed into your templates.
 
 image:
+  # -- Image registry
+  registry: registry-cn-beijing-vpc.ack.aliyuncs.com
   # -- Image repository
-  repository: registry.cn-beijing.aliyuncs.com/poc/spark-tpcds-benchmark
+  repository: ack-demo/spark-tpcds-benchmark
   # -- Image tag
-  tag: 3.3.2-0.1
+  tag: 3.5.3-0.1
   # -- Image pull policy
   pullPolicy: IfNotPresent
   # -- Image pull secrets

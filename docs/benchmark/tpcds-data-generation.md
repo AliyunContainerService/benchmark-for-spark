@@ -14,14 +14,18 @@
 执行如下命令，构建基准测试容器镜像并推送至镜像仓库：
 
 ```shell
-IMAGE_REPOSITORY=registry.cn-beijing.aliyuncs.com/poc/spark-tpcds-benchmark
-IMAGE_TAG=3.3.2-0.1
+IMAGE_REGISTRY=registry-cn-beijing.ack.aliyuncs.com      # 请替换成你的镜像仓库地址
+IMAGE_REPOSITORY=ack-demo/spark-tpcds-benchmark          # 请替换成你的镜像仓库名称
+IMAGE_TAG=3.3.2-0.1                                      # 镜像标签
+IMAGE=${IMAGE_REGISTRY}/${IMAGE_REPOSITORY}:${IMAGE_TAG} # 完整的镜像地址
+PLATFORMS=linux/amd64,linux/arm64                        # 镜像架构
 
+# 构建镜像并推送至你的镜像仓库中
 docker buildx build \
     --output=type=registry \
     --push \
-    --platform=linux/amd64,linux/arm64 \
-    --tag=${IMAGE_REPOSITORY}:${IMAGE_TAG} \
+    --platform=${PLATFORMS} \
+    --tag=${IMAGE} \
     --build-arg=SPARK_IMAGE=apache/spark:v3.3.2 \
     .
 ```
@@ -181,6 +185,7 @@ docker buildx build \
 
     ```shell
     helm install tpcds-data-generation charts/tpcds-data-generation \
+        --set image.registry=${IMAGE_REGISTRY} \
         --set image.repository=${IMAGE_REPOSITORY} \
         --set image.tag=${IMAGE_TAG} \
         --set oss.bucket=${OSS_BUCKET} \
@@ -212,31 +217,31 @@ ossutil ls -d oss://${OSS_BUCKET}/spark/data/tpcds/${SCALE_FACTOR}gb/
 预期输出：
 
 ```text
-oss://spark-on-ack/spark/data/tpcds/3072gb/
-oss://spark-on-ack/spark/data/tpcds/3072gb/call_center/
-oss://spark-on-ack/spark/data/tpcds/3072gb/catalog_page/
-oss://spark-on-ack/spark/data/tpcds/3072gb/catalog_returns/
-oss://spark-on-ack/spark/data/tpcds/3072gb/catalog_sales/
-oss://spark-on-ack/spark/data/tpcds/3072gb/customer/
-oss://spark-on-ack/spark/data/tpcds/3072gb/customer_address/
-oss://spark-on-ack/spark/data/tpcds/3072gb/customer_demographics/
-oss://spark-on-ack/spark/data/tpcds/3072gb/date_dim/
-oss://spark-on-ack/spark/data/tpcds/3072gb/household_demographics/
-oss://spark-on-ack/spark/data/tpcds/3072gb/income_band/
-oss://spark-on-ack/spark/data/tpcds/3072gb/inventory/
-oss://spark-on-ack/spark/data/tpcds/3072gb/item/
-oss://spark-on-ack/spark/data/tpcds/3072gb/promotion/
-oss://spark-on-ack/spark/data/tpcds/3072gb/reason/
-oss://spark-on-ack/spark/data/tpcds/3072gb/ship_mode/
-oss://spark-on-ack/spark/data/tpcds/3072gb/store/
-oss://spark-on-ack/spark/data/tpcds/3072gb/store_returns/
-oss://spark-on-ack/spark/data/tpcds/3072gb/store_sales/
-oss://spark-on-ack/spark/data/tpcds/3072gb/time_dim/
-oss://spark-on-ack/spark/data/tpcds/3072gb/warehouse/
-oss://spark-on-ack/spark/data/tpcds/3072gb/web_page/
-oss://spark-on-ack/spark/data/tpcds/3072gb/web_returns/
-oss://spark-on-ack/spark/data/tpcds/3072gb/web_sales/
-oss://spark-on-ack/spark/data/tpcds/3072gb/web_site/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/call_center/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/catalog_page/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/catalog_returns/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/catalog_sales/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/customer/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/customer_address/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/customer_demographics/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/date_dim/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/household_demographics/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/income_band/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/inventory/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/item/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/promotion/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/reason/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/ship_mode/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/store/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/store_returns/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/store_sales/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/time_dim/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/warehouse/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/web_page/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/web_returns/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/web_sales/
+oss://spark-on-ack/spark/data/tpcds/SF=3072/web_site/
 Object and Directory Number is: 25
 
 0.446278(s) elapsed
