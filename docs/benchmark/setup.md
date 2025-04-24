@@ -52,23 +52,16 @@ cd benchmark-for-spark
 
 ## 配置 Terraform
 
-切换到 `terraform/alicloud` 目录下：
-
-```bash
-cd terraform/alicloud
-```
-
 terraform 配置文件目录结构如下：
 
 ```bash
-$ tree -L 2    
-.
+$ tree -L 2 terraform/alicloud
+terraform/alicloud
 ├── datasources.tf       # 数据源
 ├── main.tf              # 配置文件
 ├── modules              # 子模块定义
 │   ├── celeborn
 │   ├── cs
-│   ├── eci
 │   ├── ecs
 │   ├── fluid
 │   ├── oss
@@ -112,7 +105,7 @@ export ALICLOUD_SECRET_KEY=<ACCESS_KEY_SECRET>
 
 ### 选择要创建的模块
 
-在 `root.tf` 配置文件中可以配置需要创建的模块，对于可选模块，如果不需要创建，用 `#` 将其注释掉即可：
+在 `terraform/alicloud/root.tf` 配置文件中可以配置需要创建的模块，对于可选模块，如果不需要创建，用 `#` 将其注释掉即可：
 
 ```terraform
 # Create resource group
@@ -199,7 +192,7 @@ module "spark" {
 
 ### 修改输入参数
 
-你可以通过修改配置文件 `terraform.tfvars` 来配置集群的规模和实例规格：
+你可以通过修改配置文件 `terraform.tfvars` 来配置集群的规模和实例规格或者在运行时通过 `--var` 参数动态修改输入参数：
 
 ```terraform
 # Alicloud
@@ -207,7 +200,7 @@ zone_id = "cn-beijing-i"
 
 # Spark
 spark_master_instance_count = 1
-spark_master_instance_type  = "ecs.g7.2xlarge"
+spark_master_instance_type  = "ecs.g7.4xlarge"
 spark_worker_instance_count = 6
 spark_worker_instance_type  = "ecs.g7.8xlarge"
 
@@ -224,69 +217,52 @@ celeborn_instance_type  = "ecs.i3.2xlarge"
 
 - 对于可选模块，如果没有启用，相应的配置参数忽略掉即可。
 
-### 创建资源
+## 创建基准测试集群环境
 
-执行如下命令初始化 terraform：
+本文创建的基准测试集群环境涉及到的阿里云资源包括：
 
-```bash
-terraform init
-```
+- 资源组
+- ECS 安全组
+- VPC 网络和虚拟交换机
+- ACK 集群，该集群包含多个节点池，包括 `spark-master`、`spark-worker`、`celeborn-master`、`celeborn-worker` 和 `fluid` 等节点池。
 
-该命令执行完成后会在当前目录下创建 `.terraform` 目录用于存储相关配置信息。
+1. 执行如下命令，初始化 Terraform：
 
-执行如下命令创建阿里云各项资源：
+    ```bash
+    terraform -chdir=terraform/alicloud init
+    ```
 
-```bash
-terraform apply
-```
+2. 执行如下命令，创建测试环境：
 
-该命令执行完成后会在当前目录下创建 `terraform.tfstate` 和 `terraform.tfstate.backup` 等文件用于存储状态信息。
+    ```bash
+    terraform -chdir=terraform/alicloud apply \
+        --var region=cn-beijing \
+        --var zone_id=cn-beijing-i \
+        --var spark_master_instance_count=1 \
+        --var spark_master_instance_type=ecs.g7.4xlarge \
+        --var spark_worker_instance_count=6 \
+        --var spark_worker_instance_type=ecs.g7.8xlarge
+    ```
+
+    命令执行过程中需要手动输入 `yes` 进行确认，该命令执行完成后会在当前目录下创建 `terraform.tfstate` 和 `terraform.tfstate.backup` 等文件用于存储状态信息。
+
+等待集群创建完成后，登录[阿里云容器服务控制台](https://csnew.console.aliyun.com)，查看集群状态，该集群包括如下节点池：
+
+- `spark-master` 节点池：包含 `1` 个规格为 `ecs.g7.4xlarge` 的节点。
+- `spark-worker` 节点池：包含 `6` 个规格为 `ecs.g7.8xlarge` 的节点。
+- `celeborn-master` 节点池：包含 `0` 个规格为 `ecs.g7.2xlarge` 的节点。
+- `celeborn-worker` 节点池：包含 `0` 个规格为 `ecs.i4.8xlarge` 的节点。
+- `fluid` 节点池：包含 `0` 个规格为 `ecs.i4.8xlarge` 的节点。
 
 ⚠️ 注意事项：
 
 - 新创建的 ACK 集群的 kubeconfig 文件会直接保存到 `~/.kube/config`，请注意对原有的 kubeconfig 文件进行备份。
 
-## 创建 Fluid 节点池（可选）
-
-如果需要创建 Fluid 节点池，在 `terraform/alicloud/root.tf` 文件中取消注释 fluid 模块：
-
-```terraform
-# Create node pool for fluid
-module "fluid" {
-  source            = "./modules/fluid"
-  suffix            = random_string.suffix.id
-  cluster_id        = module.cs.cluster_id
-  vswitch_ids       = [module.vpc.vswitch_id]
-  instance_count    = var.fluid_instance_count
-  instance_type     = var.fluid_instance_type
-  resource_group_id = module.resource_manager.resource_group_id
-  security_group_id = module.ecs.security_group_id
-}
-```
-
-并在 `terraform/alicloud/terraform.tfvars` 文件中配置 fluid 节点池相关参数，包括节点数量和实例类型：
-
-```terraform
-# Fluid
-fluid_instance_count = 1
-fluid_instance_type  = "ecs.i3.2xlarge"
-```
-
-然后执行如下命令创建 Fluid 节点池资源：
-
-```bash
-# 仅在第一次启用该模块时需要执行初始化
-terraform init
-
-# 创建资源
-terraform apply
-```
-
 ## 准备依赖 Jar 包并上传至 OSS
 
 1. 执行如下命令，设置 OSS 相关配置：
 
-    ```shell
+    ```bash
     # OSS 存储桶所在地域
     REGION=cn-beijing
 
@@ -299,7 +275,7 @@ terraform apply
 
 2. 如果指定的 OSS 存储桶不存在，执行如下命令，创建该存储桶：
 
-    ```shell
+    ```bash
     ossutil mb oss://${OSS_BUCKET} --region ${REGION}
     ```
 
@@ -307,7 +283,7 @@ terraform apply
 
     a. 如果选择 [Hadoop-Aliyun SDK](https://apache.github.io/hadoop/hadoop-aliyun/tools/hadoop-aliyun/index.html)，执行如下命令：
 
-    ```shell
+    ```bash
     # Download Hadoop-Aliyun SDK jars
     wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aliyun/3.3.4/hadoop-aliyun-3.3.4.jar
     wget https://repo1.maven.org/maven2/com/aliyun/oss/aliyun-sdk-oss/3.17.4/aliyun-sdk-oss-3.17.4.jar
@@ -321,7 +297,7 @@ terraform apply
 
     b. 如果选择 [Hadoop-AWS SDK](https://apache.github.io/hadoop/hadoop-aws/tools/hadoop-aws/index.html)，执行如下命令：
 
-    ```shell
+    ```bash
     # Download Hadoop-AWS SDK jars
     wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar
     wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.367/aws-java-sdk-bundle-1.12.367.jar
@@ -333,7 +309,7 @@ terraform apply
 
     c. 如果选择 [JindoSDK](https://github.com/aliyun/alibabacloud-jindodata)，执行如下命令：
 
-    ```shell
+    ```bash
     # Download JindoSDK
     wget https://jindodata-binary.oss-cn-shanghai.aliyuncs.com/mvn-repo/com/aliyun/jindodata/jindo-core/6.4.0/jindo-core-6.4.0.jar
     wget https://jindodata-binary.oss-cn-shanghai.aliyuncs.com/mvn-repo/com/aliyun/jindodata/jindo-core-linux-el7-aarch64/6.4.0/jindo-core-linux-el7-aarch64-6.4.0.jar
@@ -351,7 +327,7 @@ terraform apply
 
 执行如下命令，构建基准测试容器镜像并推送至镜像仓库：
 
-```shell
+```bash
 IMAGE_REGISTRY=registry-cn-beijing.ack.aliyuncs.com      # 请替换成你的镜像仓库地址
 IMAGE_REPOSITORY=ack-demo/spark-tpcds-benchmark          # 请替换成你的镜像仓库名称
 IMAGE_TAG=3.3.2-0.1                                      # 镜像标签
@@ -371,44 +347,7 @@ docker buildx build \
 - 该容器镜像中包含了基准测试相关的 Jar 包，后续步骤中会将其他依赖 Jar 包上传至 OSS，并将 OSS 作为只读存储卷挂载至 Spark Pod 中。
 - 你可以通过修改变量 `IMAGE_REPOSITORY` 和 `IMAGE_TAG` 的值以使用自己的镜像仓库。
 
-## 创建基准测试集群环境
-
-本文创建的基准测试集群环境涉及到的阿里云资源包括：
-
-- 资源组
-- ECS 安全组
-- VPC 网络和虚拟交换机
-- ACK 集群，该集群包含多个节点池，包括 `spark-master`、`spark-worker`、`celeborn-master`、`celeborn-worker` 和 `fluid` 等节点池。
-
-1. 执行如下命令，初始化 Terraform：
-
-    ```shell
-    terraform -chdir=terraform/alicloud init
-    ```
-
-2. 执行如下命令，创建测试环境：
-
-    ```shell
-    terraform -chdir=terraform/alicloud apply \
-        --var region=cn-beijing \
-        --var zone_id=cn-beijing-i \
-        --var spark_master_instance_count=1 \
-        --var spark_master_instance_type=ecs.g7.2xlarge \
-        --var spark_worker_instance_count=6 \
-        --var spark_worker_instance_type=ecs.g7.8xlarge
-    ```
-
-    命令执行过程中需要手动输入 `yes` 进行确认。
-
-等待集群创建完成后，登录[阿里云容器服务控制台](https://csnew.console.aliyun.com)，查看集群状态，该集群包括如下节点池：
-
-- `spark-master` 节点池：包含 `1` 个规格为 `ecs.g7.2xlarge` 的节点。
-- `spark-worker` 节点池：包含 `6` 个规格为 `ecs.g7.8xlarge` 的节点。
-- `celeborn-master` 节点池：包含 `0` 个规格为 `ecs.g7.2xlarge` 的节点。
-- `celeborn-worker` 节点池：包含 `0` 个规格为 `ecs.i4.8xlarge` 的节点。
-- `fluid` 节点池：包含 `0` 个规格为 `ecs.i4.8xlarge` 的节点。
-
-## 步骤三：创建 PV 和 PVC
+## 创建 PV 和 PVC
 
 1. 为 Spark 作业创建名为 `spark` 的命名空间：
 
@@ -435,7 +374,7 @@ docker buildx build \
 
 3. 执行如下命令创建 Secret 资源：
 
-    ```shell
+    ```bash
     kubectl create -f oss-secret.yaml
     ```
 
@@ -474,7 +413,7 @@ docker buildx build \
 
 5. 执行如下命令创建 PV 资源：
 
-    ```shell
+    ```bash
     kubectl create -f oss-pv.yaml
     ```
 
@@ -499,13 +438,13 @@ docker buildx build \
 
 7. 执行如下命令创建 PVC 资源：
 
-    ```shell
+    ```bash
     kubectl create -f oss-pvc.yaml
     ```
 
 8. 执行如下命令查看 PVC 状态：
 
-    ```shell
+    ```bash
     kubectl get -n spark pvc oss-pvc
     ```
 
@@ -522,13 +461,13 @@ docker buildx build \
 
 1. 如果尙未添加阿里云容器服务 Helm chart 仓库，执行如下命令进行添加：
 
-    ```shell
+    ```bash
     helm repo add --force-update aliyunhub https://aliacs-app-catalog.oss-cn-hangzhou.aliyuncs.com/charts-incubator
     ```
 
 2. 执行如下命令，部署阿里云 `ack-spark-operator` 组件：
 
-    ```shell
+    ```bash
     helm install spark-operator aliyunhub/ack-spark-operator \
         --version 2.1.2 \
         --namespace spark \
@@ -543,12 +482,50 @@ docker buildx build \
 
 ## 安装 ack-spark-history-server（可选）
 
-部署 ack-spark-history-server 请参考[使用 Spark History Server 查看 Spark 作业信息](https://help.aliyun.com/ack/ack-managed-and-ack-dedicated/use-cases/use-spark-history-server-to-view-spark-job-information)。
+1. 如果 OSS 存储桶尚未创建日志存储目录 `spark/event-logs`，执行如下命令进行创建：
+
+    ```bash
+    ossutil mb oss://${OSS_BUCKET}/spark/event-logs
+    ```
+
+2. 如果尙未添加阿里云容器服务 Helm chart 仓库，执行如下命令进行添加：
+
+    ```bash
+    helm repo add --force-update aliyunhub https://aliacs-app-catalog.oss-cn-hangzhou.aliyuncs.com/charts-incubator
+    ```
+
+3. 执行如下命令，部署阿里云 `ack-spark-operator` 组件：
+
+    ```bash
+    helm install spark-history-server aliyunhub/ack-spark-history-server \
+        --version 1.4.0 \
+        --namespace spark \
+        --create-namespace \
+        --set image.registry=registry-cn-beijing-vpc.ack.aliyuncs.com \
+        --set 'sparkConf.spark\.history\.fs\.logDirectory=file:///mnt/oss/spark/event-logs' \
+        --set 'volumes[0].name=oss' \
+        --set 'volumes[0].persistentVolumeClaim.claimName=oss-pvc' \
+        --set 'env[0].name=SPARK_DAEMON_MEMORY' \
+        --set 'env[0].value=7g' \
+        --set 'volumeMounts[0].name=oss' \
+        --set 'volumeMounts[0].subPath=spark/event-logs' \
+        --set 'volumeMounts[0].mountPath=/mnt/oss/spark/event-logs' \
+        --set resources.requests.cpu=2 \
+        --set resources.requests.memory=8Gi \
+        --set resources.limits.cpu=2 \
+        --set resources.limits.memory=8Gi \
+        --set 'nodeSelector.spark\.tpcds\.benchmark/role=spark-master'
+    ```
+
+    注：
+
+    - 需要根据集群所在地域选择对应的镜像仓库地址，例如杭州地域内网镜像地址为 `registry-cn-hangzhou-vpc.ack.aliyuncs.com`；
+    - 部署 ack-spark-history-server 请参考[使用 Spark History Server 查看 Spark 作业信息](https://help.aliyun.com/ack/ack-managed-and-ack-dedicated/use-cases/use-spark-history-server-to-view-spark-job-information)。
 
 ## 释放资源
 
 在基准测试完成之后可以执行如下命令释放资源：
 
 ```bash
-terraform destroy
+terraform -chdir=terraform/alicloud destroy
 ```
