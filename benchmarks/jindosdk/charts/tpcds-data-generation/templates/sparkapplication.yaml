@@ -125,7 +125,7 @@ spec:
     volumeMounts:
     - name: oss-pvc
       mountPath: /mnt/oss
-    serviceAccount: spark
+    serviceAccount: spark-operator-spark
     nodeSelector:
       spark.tpcds.benchmark/role: spark-master
     tolerations:
