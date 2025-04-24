@@ -1,4 +1,4 @@
-ARG SPARK_IMAGE=spark:3.5.3
+ARG SPARK_IMAGE=spark:3.5.5
 
 ARG SBT_IMAGE=sbtscala/scala-sbt:eclipse-temurin-jammy-17.0.10_7_1.10.4_2.12.20
 
