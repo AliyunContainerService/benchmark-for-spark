@@ -328,9 +328,10 @@ celeborn_instance_type  = "ecs.i3.2xlarge"
 执行如下命令，构建基准测试容器镜像并推送至镜像仓库：
 
 ```bash
+SPARK_IMAGE=spark:3.5.5                                  # 请替换成你的 Spark 基础镜像
 IMAGE_REGISTRY=registry-cn-beijing.ack.aliyuncs.com      # 请替换成你的镜像仓库地址
 IMAGE_REPOSITORY=ack-demo/spark-tpcds-benchmark          # 请替换成你的镜像仓库名称
-IMAGE_TAG=3.3.2-0.1                                      # 镜像标签
+IMAGE_TAG=3.5.5                                          # 镜像标签
 IMAGE=${IMAGE_REGISTRY}/${IMAGE_REPOSITORY}:${IMAGE_TAG} # 完整的镜像地址
 PLATFORMS=linux/amd64,linux/arm64                        # 镜像架构
 
@@ -340,7 +341,7 @@ docker buildx build \
     --push \
     --platform=${PLATFORMS} \
     --tag=${IMAGE} \
-    --build-arg=SPARK_IMAGE=apache/spark:v3.3.2 \
+    --build-arg=SPARK_IMAGE=${SPARK_IMAGE} \
     .
 ```
 
