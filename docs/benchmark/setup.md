@@ -282,6 +282,242 @@ terraform init
 terraform apply
 ```
 
+## 准备依赖 Jar 包并上传至 OSS
+
+1. 执行如下命令，设置 OSS 相关配置：
+
+    ```shell
+    # OSS 存储桶所在地域
+    REGION=cn-beijing
+
+    # OSS 存储桶名称
+    OSS_BUCKET=example-bucket
+
+    # OSS 访问端点（默认使用内网访问端点）
+    OSS_ENDPOINT=oss-${REGION}-internal.aliyuncs.com
+    ```
+
+2. 如果指定的 OSS 存储桶不存在，执行如下命令，创建该存储桶：
+
+    ```shell
+    ossutil mb oss://${OSS_BUCKET} --region ${REGION}
+    ```
+
+3. Spark 作业访问 OSS 数据有多种方式，根据选择的 SDK 下载相应的 Jar 包，并上传至 OSS。
+
+    a. 如果选择 [Hadoop-Aliyun SDK](https://apache.github.io/hadoop/hadoop-aliyun/tools/hadoop-aliyun/index.html)，执行如下命令：
+
+    ```shell
+    # Download Hadoop-Aliyun SDK jars
+    wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aliyun/3.3.4/hadoop-aliyun-3.3.4.jar
+    wget https://repo1.maven.org/maven2/com/aliyun/oss/aliyun-sdk-oss/3.17.4/aliyun-sdk-oss-3.17.4.jar
+    wget https://repo1.maven.org/maven2/org/jdom/jdom2/2.0.6.1/jdom2-2.0.6.1.jar
+
+    # Upload Hadoop-Aliyun SDK jars to OSS
+    ossutil cp hadoop-aliyun-3.3.4.jar oss://${OSS_BUCKET}/spark/jars/
+    ossutil cp aliyun-sdk-oss-3.17.4.jar oss://${OSS_BUCKET}/spark/jars/
+    ossutil cp jdom2-2.0.6.1.jar oss://${OSS_BUCKET}/spark/jars/
+    ```
+
+    b. 如果选择 [Hadoop-AWS SDK](https://apache.github.io/hadoop/hadoop-aws/tools/hadoop-aws/index.html)，执行如下命令：
+
+    ```shell
+    # Download Hadoop-AWS SDK jars
+    wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar
+    wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.367/aws-java-sdk-bundle-1.12.367.jar
+
+    # Upload Hadoop-AWS SDK jars to OSS
+    ossutil cp hadoop-aws-3.3.4.jar oss://${OSS_BUCKET}/spark/jars/
+    ossutil cp aws-java-sdk-bundle-1.12.367.jar oss://${OSS_BUCKET}/spark/jars/
+    ```
+
+    c. 如果选择 [JindoSDK](https://github.com/aliyun/alibabacloud-jindodata)，执行如下命令：
+
+    ```shell
+    # Download JindoSDK
+    wget https://jindodata-binary.oss-cn-shanghai.aliyuncs.com/mvn-repo/com/aliyun/jindodata/jindo-core/6.4.0/jindo-core-6.4.0.jar
+    wget https://jindodata-binary.oss-cn-shanghai.aliyuncs.com/mvn-repo/com/aliyun/jindodata/jindo-core-linux-el7-aarch64/6.4.0/jindo-core-linux-el7-aarch64-6.4.0.jar
+    wget https://jindodata-binary.oss-cn-shanghai.aliyuncs.com/mvn-repo/com/aliyun/jindodata/jindo-core-linux-el6-x86_64/6.4.0/jindo-core-linux-el6-x86_64-6.4.0.jar
+    wget https://jindodata-binary.oss-cn-shanghai.aliyuncs.com/mvn-repo/com/aliyun/jindodata/jindo-sdk/6.4.0/jindo-sdk-6.4.0.jar
+
+    # Upload JindoSDK jars to OSS
+    ossutil cp jindo-core-6.4.0.jar oss://${OSS_BUCKET}/spark/jars/
+    ossutil cp jindo-core-linux-el7-aarch64-6.4.0.jar oss://${OSS_BUCKET}/spark/jars/
+    ossutil cp jindo-core-linux-el6-x86_64-6.4.0.jar oss://${OSS_BUCKET}/spark/jars/
+    ossutil cp jindo-sdk-6.4.0.jar oss://${OSS_BUCKET}/spark/jars/
+    ```
+
+## 准备基准测试容器镜像
+
+执行如下命令，构建基准测试容器镜像并推送至镜像仓库：
+
+```shell
+IMAGE_REGISTRY=registry-cn-beijing.ack.aliyuncs.com      # 请替换成你的镜像仓库地址
+IMAGE_REPOSITORY=ack-demo/spark-tpcds-benchmark          # 请替换成你的镜像仓库名称
+IMAGE_TAG=3.3.2-0.1                                      # 镜像标签
+IMAGE=${IMAGE_REGISTRY}/${IMAGE_REPOSITORY}:${IMAGE_TAG} # 完整的镜像地址
+PLATFORMS=linux/amd64,linux/arm64                        # 镜像架构
+
+# 构建镜像并推送至你的镜像仓库中
+docker buildx build \
+    --output=type=registry \
+    --push \
+    --platform=${PLATFORMS} \
+    --tag=${IMAGE} \
+    --build-arg=SPARK_IMAGE=apache/spark:v3.3.2 \
+    .
+```
+
+- 该容器镜像中包含了基准测试相关的 Jar 包，后续步骤中会将其他依赖 Jar 包上传至 OSS，并将 OSS 作为只读存储卷挂载至 Spark Pod 中。
+- 你可以通过修改变量 `IMAGE_REPOSITORY` 和 `IMAGE_TAG` 的值以使用自己的镜像仓库。
+
+## 创建基准测试集群环境
+
+本文创建的基准测试集群环境涉及到的阿里云资源包括：
+
+- 资源组
+- ECS 安全组
+- VPC 网络和虚拟交换机
+- ACK 集群，该集群包含多个节点池，包括 `spark-master`、`spark-worker`、`celeborn-master`、`celeborn-worker` 和 `fluid` 等节点池。
+
+1. 执行如下命令，初始化 Terraform：
+
+    ```shell
+    terraform -chdir=terraform/alicloud init
+    ```
+
+2. 执行如下命令，创建测试环境：
+
+    ```shell
+    terraform -chdir=terraform/alicloud apply \
+        --var region=cn-beijing \
+        --var zone_id=cn-beijing-i \
+        --var spark_master_instance_count=1 \
+        --var spark_master_instance_type=ecs.g7.2xlarge \
+        --var spark_worker_instance_count=6 \
+        --var spark_worker_instance_type=ecs.g7.8xlarge
+    ```
+
+    命令执行过程中需要手动输入 `yes` 进行确认。
+
+等待集群创建完成后，登录[阿里云容器服务控制台](https://csnew.console.aliyun.com)，查看集群状态，该集群包括如下节点池：
+
+- `spark-master` 节点池：包含 `1` 个规格为 `ecs.g7.2xlarge` 的节点。
+- `spark-worker` 节点池：包含 `6` 个规格为 `ecs.g7.8xlarge` 的节点。
+- `celeborn-master` 节点池：包含 `0` 个规格为 `ecs.g7.2xlarge` 的节点。
+- `celeborn-worker` 节点池：包含 `0` 个规格为 `ecs.i4.8xlarge` 的节点。
+- `fluid` 节点池：包含 `0` 个规格为 `ecs.i4.8xlarge` 的节点。
+
+## 步骤三：创建 PV 和 PVC
+
+1. 为 Spark 作业创建名为 `spark` 的命名空间：
+
+    ```bash
+    kubectl create namespace spark
+    ```
+
+2. 创建如下 Secret 清单文件并保存为 `oss-secret.yaml`：
+
+    ```yaml
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: oss-secret
+      namespace: spark
+    stringData:
+      akId: <OSS_ACCESS_KEY_ID>
+      akSecret: <OSS_ACCESS_KEY_SECRET>
+    ```
+
+    注意事项：
+
+    - `<OSS_ACCESS_KEY_ID>` 和 `<OSS_ACCESS_KEY_SECRET>` 需分别替换成阿里云 AccessKey ID 和 AccessKey Secret。
+
+3. 执行如下命令创建 Secret 资源：
+
+    ```shell
+    kubectl create -f oss-secret.yaml
+    ```
+
+4. 创建如下 PV 清单文件并保存为 `oss-pv.yaml`：
+
+    ```yaml
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: oss-pv
+      labels:
+        alicloud-pvname: oss-pv
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+      - ReadOnlyMany
+      persistentVolumeReclaimPolicy: Retain
+      csi:
+        driver: ossplugin.csi.alibabacloud.com
+        volumeHandle: oss-pv
+        nodePublishSecretRef:
+          name: oss-secret
+          namespace: spark
+        volumeAttributes:
+          bucket: <OSS_BUCKET>
+          url: <OSS_ENDPOINT>
+          otherOpts: "-o umask=022 -o max_stat_cache_size=0 -o allow_other"
+          path: /
+    ```
+
+    注意事项：
+
+    - `<OSS_BUCKET>` 需要替换成 OSS 存储桶名称。
+    - `<OSS_ENDPOINT>` 需要替换成 OSS 访问端点，例如北京地域 OSS 内网访问端点为 `oss-cn-beijing-internal.aliyuncs.com`。
+
+5. 执行如下命令创建 PV 资源：
+
+    ```shell
+    kubectl create -f oss-pv.yaml
+    ```
+
+6. 创建如下 PVC 清单文件并保存为 `oss-pvc.yaml`：
+
+    ```yaml
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: oss-pvc
+      namespace: spark
+    spec:
+      accessModes:
+      - ReadOnlyMany
+      resources:
+        requests:
+          storage: 1Ti
+      selector:
+        matchLabels:
+          alicloud-pvname: oss-pv
+    ```
+
+7. 执行如下命令创建 PVC 资源：
+
+    ```shell
+    kubectl create -f oss-pvc.yaml
+    ```
+
+8. 执行如下命令查看 PVC 状态：
+
+    ```shell
+    kubectl get -n spark pvc oss-pvc
+    ```
+
+    预期输出：
+
+    ```text
+    NAME      STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+    oss-pvc   Bound    oss-pv   200Gi      ROX                           38s
+    ```
+
+    输出表明 PVC 已经创建并绑定成功。
+
 ## 部署 ack-spark-operator
 
 1. 如果尙未添加阿里云容器服务 Helm chart 仓库，执行如下命令进行添加：
@@ -298,9 +534,12 @@ terraform apply
         --namespace spark \
         --create-namespace \
         --set image.registry=registry-cn-beijing-vpc.ack.aliyuncs.com \
-        --set 'spark.jobNamespaces={default}' \
-        --set spark.serviceAccount.name=spark
+        --set 'spark.jobNamespaces={spark}'
     ```
+
+    注：
+
+    - 需要根据集群所在地域选择对应的镜像仓库地址，例如杭州地域内网镜像地址为 `registry-cn-hangzhou-vpc.ack.aliyuncs.com`。
 
 ## 安装 ack-spark-history-server（可选）
 
