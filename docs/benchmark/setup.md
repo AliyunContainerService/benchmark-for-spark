@@ -294,7 +294,7 @@ terraform apply
 
     ```shell
     helm install spark-operator aliyunhub/ack-spark-operator \
-        --version 2.1.0 \
+        --version 2.1.2 \
         --namespace spark \
         --create-namespace \
         --set image.registry=registry-cn-beijing-vpc.ack.aliyuncs.com \
