@@ -66,7 +66,7 @@ spec:
     mapreduce.fileoutputcommitter.algorithm.version": "2"
   sparkConf:
     # Application properties
-    spark.local.dir: /mnt/disk1,/mnt/disk2,/mnt/disk3,/mnt/disk4,/mnt/disk5,/mnt/disk6
+    spark.local.dir: /mnt/disk1,/mnt/disk2,/mnt/disk3,/mnt/disk4
     spark.eventLog.enabled: "true"
     {{- if or (eq .Values.sdk "hadoop-aliyun") (eq .Values.sdk "jindoSDK") }}
     spark.eventLog.dir: oss://{{ .Values.oss.bucket }}/spark/event-logs
@@ -194,10 +194,6 @@ spec:
       mountPath: /mnt/disk3
     - name: spark-local-dir-4
       mountPath: /mnt/disk4
-    - name: spark-local-dir-5
-      mountPath: /mnt/disk5
-    - name: spark-local-dir-6
-      mountPath: /mnt/disk6
     nodeSelector:
       spark.tpcds.benchmark/role: spark-worker
     tolerations:
@@ -226,14 +222,6 @@ spec:
   - name: spark-local-dir-4
     hostPath:
       path: /mnt/disk4
-      type: Directory
-  - name: spark-local-dir-5
-    hostPath:
-      path: /mnt/disk5
-      type: Directory
-  - name: spark-local-dir-6
-    hostPath:
-      path: /mnt/disk6
       type: Directory
   deps:
     jars:
