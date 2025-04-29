@@ -1,5 +1,5 @@
 resource "alicloud_security_group" "default" {
-  name                = "sg-${var.suffix}"
+  security_group_name = "sg-${var.suffix}"
   vpc_id              = var.vpc_id
   resource_group_id   = var.resource_group_id
   security_group_type = var.security_group_type
