@@ -72,6 +72,8 @@ resource "alicloud_cs_kubernetes_node_pool" "spark-worker" {
     effect = "NoSchedule"
   }
 
+  user_data = base64encode("chmod 777 /mnt/disk*")
+
   resource_group_id  = var.resource_group_id
   security_group_ids = [var.security_group_id]
 }
