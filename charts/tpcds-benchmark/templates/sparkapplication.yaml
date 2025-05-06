@@ -169,11 +169,11 @@ spec:
       value: spark-master
       effect: NoSchedule
   executor:
-    instances: 60
-    cores: 3
-    coreLimit: "3"
-    memory: 9g
-    memoryOverhead: 3g
+    instances: 62
+    cores: 6
+    coreLimit: "6"
+    memory: 18g
+    memoryOverhead: 6g
     env:
     - name: OSS_ACCESS_KEY_ID
       valueFrom:
