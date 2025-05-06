@@ -248,7 +248,7 @@ spec:
   deps:
     jars:
     {{- if eq .Values.sdk "hadoop-aliyun" }}
-    - local:///mnt/oss/spark/jars/hadoop-aliyun-3.3.2.jar
+    - local:///mnt/oss/spark/jars/hadoop-aliyun-3.3.4.jar
     - local:///mnt/oss/spark/jars/aliyun-sdk-oss-3.17.4.jar
     - local:///mnt/oss/spark/jars/jdom2-2.0.6.1.jar
     {{- else if eq .Values.sdk "hadoop-aws" }}
